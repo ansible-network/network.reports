@@ -1,0 +1,41 @@
+---
+- name: Gather the supported resource modules
+  ansible.netcommon.network_resource:
+    os_name: "{{ ansible_network_os }}"
+  register: gather_network_resources_list
+
+- name: Set Resources
+  ansible.builtin.set_fact:
+    gather_resources: "{{ gather_network_resources_list['modules'] }}"
+  when: gather_resources is undefined
+
+- name: Set network resources
+  ansible.builtin.set_fact:
+    gather_network_resources: "{{ gather_network_resources_list['modules'] | ansible.utils.param_list_compare(resources) }}"
+
+- name: Initialize all_gathered_facts as an empty dictionary
+  ansible.builtin.set_fact:
+    all_gathered_facts: {}
+
+- name: Include build tasks
+  ansible.builtin.include_tasks: facts.yaml
+  loop: "{{ gather_network_resources['actionable'] }}"
+  loop_control:
+    loop_var: res
+
+- name: Display resource facts
+  ansible.builtin.debug:
+    msg: "{{ all_gathered_facts }}"
+
+# - name: Generate PDF Report from Network Facts
+#   community.general.jinja2_to_pdf:
+#     src: "templates/report.j2"
+#     dest: "/tmp/network_report.pdf"
+#     vars:
+#       all_gathered_facts: "{{ all_gathered_facts }}"
+#   delegate_to: localhost
+
+
+- name: Build a report
+  ansible.builtin.include_role:
+    name: "/home/rothakur/ansible-collections/collections/ansible_collections/network/reports/roles/build_report_container"
