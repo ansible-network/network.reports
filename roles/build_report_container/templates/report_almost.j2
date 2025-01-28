@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Automation Report</title>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $(".tab-content").hide();
+            $("#interfaces").show();
+
+            $(".tab-button").click(function(){
+                $(".tab-content").hide();
+                $("#" + $(this).attr("data-target")).show();
+                $(".tab-button").removeClass("active");
+                $(this).addClass("active");
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Devices</h2>
+        <ul>
+            <li>{{ inventory_hostname }}</li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <div class="header">
+            <img class="logo" src="webpage_logo.png" alt="Red Hat Ansible Automation Platform Logo">
+        </div>
+        <h1>Network Automation Report</h1>
+
+        <div class="tabs">
+            <button class="tab-button active" data-target="interfaces">Interfaces</button>
+            <button class="tab-button" data-target="l2_interfaces">L2 Interfaces</button>
+            <button class="tab-button" data-target="l3_interfaces">L3 Interfaces</button>
+        </div>
+
+        <div id="interfaces" class="tab-content">
+            <h2>Interfaces</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Interface Name</th>
+                        <th>Status</th>
+                        <th>Speed</th>
+                        <th>Duplex</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for interface in all_gathered_facts.interfaces %}
+                    <tr>
+                        <td>{{ interface.name }}</td>
+                        <td class="{% if interface.enabled %}enabled{% else %}disabled{% endif %}">
+                            {{ "Enabled" if interface.enabled else "Disabled" }}
+                        </td>
+                        <td>{{ interface.speed | default('N/A') }}</td>
+                        <td>{{ interface.duplex | default('N/A') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
