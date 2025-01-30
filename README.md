@@ -1,4 +1,4 @@
-# Ansible Network BGP
+# Ansible Network Reports
 [![CI](https://github.com/redhat-cop/network.bgp/actions/workflows/tests.yml/badge.svg?event=schedule)](https://github.com/redhat-cop/network.bgp/actions/workflows/tests.yml)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7661/badge)](https://bestpractices.coreinfrastructure.org/projects/7661)
 
