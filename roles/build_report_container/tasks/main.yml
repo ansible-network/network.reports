@@ -51,14 +51,15 @@
     #mode: "644"
   delegate_to: localhost
   loop:
-    - "webpage_logo.png"
-    - "redhat-ansible-logo.svg"
+    # - "webpage_logo.png"
+    # - "redhat-ansible-logo.svg"
     - "router.png"
 
 - name: Retrieve public IP address
   ansible.builtin.command: curl https://ifconfig.me
   register: public_ip_report
   ignore_errors: true
+
 
 - name: Display link to inventory report
   ansible.builtin.debug:

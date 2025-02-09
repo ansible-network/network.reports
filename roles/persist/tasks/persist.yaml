@@ -20,11 +20,33 @@
   ansible.builtin.include_tasks: retrieve.yaml
   when: data_store['scm'] is defined
 
+- name: Initialize all_gathered_facts as an empty dictionary
+  ansible.builtin.set_fact:
+    all_gathered_facts: {}
+
 - name: Include facts tasks
   ansible.builtin.include_tasks: facts.yaml
   loop: "{{ persist_network_resources['actionable'] }}"
   loop_control:
     loop_var: res
+
+- name: Display resource facts
+  ansible.builtin.debug:
+    msg: "{{ all_gathered_facts }}"
+
+- name: Create report file
+  ansible.builtin.file:
+    path: "{{ persist_inventory_path }}/reports/{{ inventory_hostname }}"
+    state: directory
+    mode: '0777'
+  delegate_to: localhost
+
+- name: Write each resource to a file
+  ansible.builtin.copy:
+    content: "{{ {res: all_gathered_facts } | to_nice_yaml }}"
+    dest: "{{ persist_inventory_path }}/host_vars/{{ inventory_hostname }}/{{ title }}.yaml"
+    mode: '0777'
+  delegate_to: localhost
 
 - name: Include publish with tag tasks
   ansible.builtin.include_tasks: publish_tag.yaml
@@ -37,4 +59,8 @@
   when:
     - data_store.scm.origin is defined 
     - data_store.scm.origin.tag is not defined
+
+- name: Build a report
+  ansible.builtin.include_role:
+    name: "/home/rothakur/ansible-collections/collections/ansible_collections/network/reports/roles/build_report_container"
 

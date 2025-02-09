@@ -6,6 +6,12 @@
     state: gathered
   register: persist_result
 
+- name: Append resource facts to a global dictionary
+  ansible.builtin.set_fact:
+    all_gathered_facts: >-
+      {{ all_gathered_facts | default({}) | combine({ res: persist_result.gathered }) }}
+
+
 - name: Include file write task
   ansible.builtin.include_tasks: write_to_file.yaml
   when:

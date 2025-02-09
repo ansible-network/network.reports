@@ -37,11 +37,6 @@
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Header -->
-        <div class="header">
-            <img class="logo" src="webpage_logo.png" alt="Red Hat Ansible Automation Platform Logo">
-        </div>
-
         <h1>Network Report</h1>
 
         <!-- PDF Download Button -->
@@ -52,9 +47,9 @@
             <button class="tab-button active" data-target="interfaces">Interfaces</button>
             <button class="tab-button" data-target="l2_interfaces">L2 Interfaces</button>
             <button class="tab-button" data-target="l3_interfaces">L3 Interfaces</button>
-            <button class="tab-button" data-target="ospf_interfaces">OSPF Interfaces</button>
             <button class="tab-button" data-target="ospfv2">OSPFv2</button>
-            <button class="tab-button" data-target="ospfv3">OSPFv3</button>
+            <button class="tab-button" data-target="bgp_global">BGP Global</button>
+            <button class="tab-button" data-target="bgp_address_family">BGP Address Family</button>
         </div>
 
         <!-- Interfaces Tab -->
@@ -84,125 +79,97 @@
             </table>
         </div>
 
-        <!-- L2 Interfaces Tab -->
-        <div id="l2_interfaces" class="tab-content">
-            <h2>L2 Interfaces</h2>
-            {% if all_gathered_facts.l2_interfaces | length > 0 %}
+        <!-- BGP Global Tab -->
+        <div id="bgp_global" class="tab-content">
+            <h2>BGP Global</h2>
+            {% if all_gathered_facts.bgp_global %}
             <table>
                 <thead>
                     <tr>
-                        <th>Interface Name</th>
+                        <th>AS Number</th>
+                        <th>IPv4 Unicast</th>
+                        <th>Log Neighbor Changes</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for l2 in all_gathered_facts.l2_interfaces %}
                     <tr>
-                        <td>{{ l2.name }}</td>
+                        <td>{{ all_gathered_facts.bgp_global.as_number }}</td>
+                        <td>{{ all_gathered_facts.bgp_global.bgp.default.ipv4_unicast | default('N/A') }}</td>
+                        <td>{{ all_gathered_facts.bgp_global.bgp.log_neighbor_changes | default('N/A') }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>BGP Neighbors</h3>
+            {% if all_gathered_facts.bgp_global.neighbors %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Neighbor Address</th>
+                        <th>Remote AS</th>
+                        <th>Update Source</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for neighbor in all_gathered_facts.bgp_global.neighbors %}
+                    <tr>
+                        <td>{{ neighbor.neighbor_address }}</td>
+                        <td>{{ neighbor.remote_as }}</td>
+                        <td>{{ neighbor.update_source | default('N/A') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% else %}
-            <p>No L2 interfaces found.</p>
+            <p>No BGP Neighbors found.</p>
             {% endif %}
-        </div>
 
-        <!-- L3 Interfaces Tab -->
-        <div id="l3_interfaces" class="tab-content">
-            <h2>L3 Interfaces</h2>
-            {% if all_gathered_facts.l3_interfaces | length > 0 %}
+            <h3>Advertised Networks</h3>
+            {% if all_gathered_facts.bgp_global.networks %}
             <table>
                 <thead>
                     <tr>
-                        <th>Interface Name</th>
-                        <th>IPv4 Address</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for l3 in all_gathered_facts.l3_interfaces %}
-                    <tr>
-                        <td>{{ l3.name }}</td>
-                        <td>
-                            {% if l3.ipv4 is defined and l3.ipv4 | length > 0 %}
-                                {% for ip in l3.ipv4 %}
-                                    {{ ip.address | default('DHCP Enabled') }}
-                                {% endfor %}
-                            {% else %}
-                                N/A
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>No L3 interfaces found.</p>
-            {% endif %}
-        </div>
-
-        <!-- OSPF Interfaces Tab -->
-        <div id="ospf_interfaces" class="tab-content">
-            <h2>OSPF Interfaces</h2>
-            {% if all_gathered_facts.ospf_interfaces | length > 0 %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Interface Name</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for ospf in all_gathered_facts.ospf_interfaces %}
-                    <tr>
-                        <td>{{ ospf.name }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <p>No OSPF interfaces found.</p>
-            {% endif %}
-        </div>
-
-        <!-- OSPFv2 Tab -->
-        <div id="ospfv2" class="tab-content">
-            <h2>OSPFv2</h2>
-            {% if all_gathered_facts.ospfv2.processes | length > 0 %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>Process ID</th>
                         <th>Network Address</th>
-                        <th>Area</th>
-                        <th>Wildcard Bits</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for process in all_gathered_facts.ospfv2.processes %}
-                        {% for network in process.network %}
-                        <tr>
-                            <td>{{ process.process_id }}</td>
-                            <td>{{ network.address }}</td>
-                            <td>{{ network.area }}</td>
-                            <td>{{ network.wildcard_bits }}</td>
-                        </tr>
-                        {% endfor %}
+                    {% for network in all_gathered_facts.bgp_global.networks %}
+                    <tr>
+                        <td>{{ network.address }}</td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
             {% else %}
-            <p>No OSPFv2 processes found.</p>
+            <p>No advertised networks found.</p>
+            {% endif %}
+
+            {% else %}
+            <p>No BGP Global data available.</p>
             {% endif %}
         </div>
 
-        <!-- OSPFv3 Tab -->
-        <div id="ospfv3" class="tab-content">
-            <h2>OSPFv3</h2>
-            {% if all_gathered_facts.ospfv3 | length > 0 %}
-            <p>OSPFv3 data exists but not formatted yet.</p>
+        <!-- BGP Address Family Tab -->
+        <div id="bgp_address_family" class="tab-content">
+            <h2>BGP Address Family</h2>
+            {% if all_gathered_facts.bgp_address_family %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>AS Number</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ all_gathered_facts.bgp_address_family.as_number }}</td>
+                    </tr>
+                </tbody>
+            </table>
             {% else %}
-            <p>No OSPFv3 data available.</p>
+            <p>No BGP Address Family data available.</p>
             {% endif %}
         </div>
+
     </div>
 
 </body>
