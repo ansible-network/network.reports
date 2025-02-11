@@ -1,20 +1,24 @@
 # Ansible Network Reports
-[![CI](https://github.com/redhat-cop/network.bgp/actions/workflows/tests.yml/badge.svg?event=schedule)](https://github.com/redhat-cop/network.bgp/actions/workflows/tests.yml)
+
+[![CI](https://github.com/redhat-cop/network.reports/actions/workflows/tests.yml/badge.svg?event=schedule)](https://github.com/redhat-cop/network.reports/actions/workflows/tests.yml)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7661/badge)](https://bestpractices.coreinfrastructure.org/projects/7661)
 
 
 ## About
 
-- Ansible Network BGP Collection contains the role that provides a platform-agnostic way of
-  managing BGP protocol/resources. This collection provides the user the capabilities to gather,
-  deploy, remediate, configure and perform health checks for network BGP resources.
+- The **Ansible Network Reports Collection** provides a platform-agnostic way to gather, generate, persist, and visualize network resource reports. 
+  This collection enables users to collect network facts, convert them into structured formats (YAML, JSON), and visualize them as HTML reports using Jinja2 templates.
 
-- Network BGP collection can be used by anyone who is looking to manage and maintain BGP protocol/resources. This includes system administrators and IT professionals.
+- This collection can be used by **network administrators**, **system operators**, and **IT professionals** looking to monitor and manage their network infrastructure through automated reporting.
+
+![Screenshot from 2025-02-11 17-30-19](https://github.com/user-attachments/assets/8f822ffd-519b-4cf8-915b-9c73351d46a5)
+
+
 
 ## Requirements
-- [Requires Ansible](https://github.com/redhat-cop/network.bgp/blob/main/meta/runtime.yml)
-- [Requires Content Collections](https://github.com/redhat-cop/network.bgp/blob/main/galaxy.yml#L5https://forum.ansible.com/c/news/5/none)
-- [Testing Requirements](https://github.com/redhat-cop/network.bgp/blob/main/test-requirements.txt)
+- [Requires Ansible](https://github.com/redhat-cop/network.reports/blob/main/meta/runtime.yml)
+- [Requires Content Collections](https://github.com/redhat-cop/network.reports/blob/main/galaxy.yml)
+- [Testing Requirements](https://github.com/redhat-cop/network.reports/blob/main/test-requirements.txt)
 - Users also need to include platform collections as per their requirements. The supported platform collections are:
   - [arista.eos](https://github.com/ansible-collections/arista.eos)
   - [cisco.ios](https://github.com/ansible-collections/cisco.ios)
@@ -23,7 +27,8 @@
   - [junipernetworks.junos](https://github.com/ansible-collections/junipernetworks.junos)
 
 ## Installation
-To consume this Validated Content from Automation Hub, the following needs to be added to ansible.cfg:
+To consume this Validated Content from Automation Hub, the following needs to be added to `ansible.cfg`:
+
 ```
 [galaxy]
 server_list = automation_hub
@@ -41,278 +46,91 @@ With this configured, simply run the following commands:
 
 ```
 ansible-galaxy collection install network.base
-ansible-galaxy collection install network.bgp
+ansible-galaxy collection install network.reports
 ```
 
 ## Use Cases
 
-`Build Brownfield Inventory`:
-- This enables users to fetch the YAML structured resource module facts for BGP resources like bgp_global, bgp_address_family and bgp_neighbor_address_family and save it as host_vars to the local or remote data store which could be used as a single SOT for other operations.
-  
-`BGP Resource Management`:
-- Users want to be able to manage the BGP global, BGP address family and BGP neighbor address family configurations. This also includes the enablement of gathering facts, updating BGP resource host-vars, and deploying config onto the appliance.
-
-`BGP Health Checks`: Users want to be able to perform health checks for BGP applications. These health checks should be able to provide the BGP neighborship status with necessary details.
-  
-`Detect Drift and remediate`: This enables users to detect any drift between the provided config and the running config and if required then override the running config.
-
-- So in summary this platform-agnostic role enables the user to perform BGP health checks. Users can perform the following health checks:
-       `all_neigbors_up`
-       `all_neighbors_down`
-       `min_neighbors_up`
-       `bgp_status_summary`
-  
-This role enables users to create a runtime brownfield inventory with all the BGP configurations in terms of host vars. These host vars are ansible facts that have been gathered through the *_bgp_global and *_bgp_address_family network resource modules. The tasks offered by this role can be observed below:
-
-### Perform BGP Health Checks
-- Health Checks operation fetches the current status of BGP Neighborship health.
-- This can also include the details about the BGP metrics(state, message received/sent, version, etc).
+### 1. Gather Network Resource Reports
+- Collect network resource facts like interfaces, BGP configurations, OSPF settings, etc.
+- Convert these facts into **YAML**, **JSON**, or **HTML** formats.
 
 ```yaml
-health_checks.yml
----
-- name: Perform health checks
-  hosts: rtr1
+- name: Gather Network Reports
+  hosts: network_devices
   gather_facts: false
   tasks:
-  - name: BGP Manager
-    ansible.builtin.include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: health_check
-          vars:
-            details: True
-            checks:
-              - name: all_neighbors_up
-              - name: all_neighbors_down
-                ignore_errors: true
-              - name: min_neighbors_up
-                min_count: 1
+    - name: Network Resource Manager
+      ansible.builtin.include_role:
+        name: network.reports.gather
+      vars:
+        format:
+          - yaml
+          - json
+        resources:
+          - interfaces
+          - l2_interfaces
+          - bgp_global
 ```
 
+### 2. Generate HTML Reports from Network Facts
+- Convert collected facts into **HTML web reports** using Jinja2 templates.
+- Run a lightweight **web server** to visualize the reports.
 
-### Building Brownfield Inventory with Persist
-- Persist operation fetches the bgp_global and bgp_address_family facts and stores them as host vars.
-- The result of a successful Persist operation would be host_vars having YAML formatted resource facts.
-- These host_vars could exist locally or even be published to a remote repository acting as SOT for operations like deploy, remediate, detect, etc.
-
-#### fetch bgp resource facts and build local data_store.
 ```yaml
-- name: Persist the facts into host vars
-  hosts: rtr1
+- name: Generate Network HTML Report
+  hosts: network_devices
   gather_facts: false
   tasks:
-  - name: Network BGP Manager
-    ansible.builtin.include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: persist
-      data_store:
-        local: "~/bgp/network"
+    - name: Generate Network Report
+      ansible.builtin.include_role:
+        name: network.reports.generate_web_report
+      vars:
+        file_path: "./network_reports"
 ```
 
-#### fetch BGP resource facts and publish persisted host_vars inventory to GitHub repository.
+### 3. Persist Network Reports to SCM (GitHub/GitLab)
+- Persist generated reports into **GitHub** or **GitLab** repositories for version control and audit.
+
 ```yaml
-- name: Persist the facts into remote data_store which is a GitHub repository
-  hosts: rtr1
+- name: Persist Reports to GitHub
+  hosts: network_devices
   gather_facts: false
   tasks:
-  - name: Network BGP Manager
-    ansible.builtin.include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: persist
-      persist_empty: false
-      data_store:
+    - name: Persist Reports to GitHub Repository
+      ansible.builtin.include_role:
+        name: network.reports.persist
+      vars:
         scm:
           origin:
-            url: "{{ your_github_repo }}"
+            url: "{{ github_repo_url }}"
             token: "{{ github_access_token }}"
             user:
-              name: "{{ ansible_github }}"
-              email: "{{ your_email@example.com }}"
-```
-
-### Display Structured Data with Gather
-- gather operation gathers the running configuration specific to bgp_global, bgp_address_family, and bgp_neighbor_address_family resources
-  and displays these facts in YAML formatted structures.
-
-```yaml
-- name: Display BGP resources in a structured format
-  hosts: rtr1
-  gather_facts: false
-  tasks:
-  - name: BGP Manager
-    ansible.builtin.include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: gather
-```
-
-### Deploy BGP Configuration
-- Deploy operation will read the facts from the provided/default or remote inventory and deploy the changes onto the appliances.
-
-#### read host_vars from local data_store and deploy onto the field.
-```yaml
-- name: Deploy changes
-  hosts: rtr1
-  gather_facts: false
-  tasks:
-  - name: Network BGP Manager
-    ansible.builtin.include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: deploy
-      data_store:
-        local: "~/bgp/network"
-```
-
-#### retrieve host_cars from the GitHub repository and deploy changes onto the field.
-```yaml
-- name: retrieve config from GitHub repo and deploy changes
-  hosts: rtr1
-  gather_facts: false
-  tasks:
-  - name: Network BGP Manager
-    ansible.builtin.include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: deploy
-      persist_empty: false
-      data_store:
-        scm:
-          origin:
-            url: "{{ your_github_repo }}"
-            token: "{{ github_access_token }}"
-            user:
-              name: "{{ ansible_github }}"
-              email: "{{ your_email@example.com }}"
-```
-
-### Detect configuration drift in BGP Configuration
-- Detect operation will read the facts from the local provided/default inventory and detect if any configuration diff exists w.r.t running-config.
-
-#### detect the config difference between host_vars in local data_store and running-config.
-
-```yaml
-- name: Configuration drift detection
-  hosts: rtr1
-  gather_facts: false
-  tasks:
-  - name: Network BGP Manager
-    ansible.builtin.include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: detect
-      data_store:
-        local: "~/bgp/network"
-```
-
-- Detect operation will read the facts from the GitHub repository inventory and detect if any configuration diff exists w.r.t running-config.
-
-#### detect the config difference between host_vars in local data_store and running-config.
-```yaml
-- name: Configuration drift detection
-  hosts: rtr1
-  gather_facts: false
-  tasks:
-  - name: Network BGP Manager
-    include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: detect
-      data_store:
-        scm:
-          origin:
-            url: "{{ your_github_repo }}"
-            token: "{{ github_access_token }}"
-            user:
-              name: "{{ ansible_github }}"
-              email: "{{ your_email@example.com }}"
-```
-
-#### Remediate configuration drift in BGP Configuration
-- remediate operation will read the facts from the locally provided/default inventory and remediate if any configuration changes are there on the appliances using the overridden state.
-
-```yaml
-- name: Remediate configuration
-  hosts: rtr1
-  gather_facts: false
-  tasks:
-  - name: Network BGP Manager
-    include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: remediate
-      data_store:
-        local: "~/bgp/network"
-```
-- remediate operation will read the facts from the GitHub repository and remediate if any configuration changes are there on the appliances using the overridden state.
-
-```yaml
-- name: Remediate configuration
-  hosts: rtr1
-  gather_facts: false
-  tasks:
-  - name: Network BGP Manager
-    include_role:
-      name: network.bgp.run
-    vars:
-      ansible_network_os: cisco.ios.ios
-      operations:
-        - name: remediate
-      data_store:
-        scm:
-          origin:
-            url: "{{ your_github_repo }}"
-            token: "{{ github_access_token }}"
-            user:
-              name: "{{ ansible_github }}"
-              email: "{{ your_email@example.com }}"
+              name: "{{ git_user_name }}"
+              email: "{{ git_user_email }}"
 ```
 
 ## Testing
 
-The project uses tox to run `ansible-lint` and `ansible-test sanity`.
-Assuming this repository is checked out in the proper structure,
-e.g. `collections_root/ansible_collections/network/bgp`, run:
+The project uses **tox** to run `ansible-lint` and `ansible-test sanity`. Assuming this repository is checked out in the proper structure, e.g., `collections_root/ansible_collections/network/reports`, run:
 
 ```shell
   tox -e ansible-lint
   tox -e py39-sanity
 ```
 
-To run integration tests, ensure that your inventory has a `network_bgp` group.
-Depending on what test target you are running, comment out the host(s).
+To run integration tests, ensure that your inventory has a `network_reports` group.
 
 ```shell
-[network_hosts]
+[network_devices]
 ios
 junos
 
 [ios:vars]
-< enter inventory details for this group >
+< enter inventory details for IOS devices >
 
 [junos:vars]
-< enter inventory details for this group >
+< enter inventory details for Junos devices >
 ```
 
 ```shell
@@ -334,15 +152,13 @@ We also use the following guidelines:
 * [Ansible collection development guide](https://docs.ansible.com/ansible/devel/dev_guide/developing_collections.html#contributing-to-collections)
 
 ### Code of Conduct
-This collection follows the Ansible project's
-[Code of Conduct](https://docs.ansible.com/ansible/devel/community/code_of_conduct.html).
-Please read and familiarize yourself with this document.
+This collection follows the Ansible project's [Code of Conduct](https://docs.ansible.com/ansible/devel/community/code_of_conduct.html). Please read and familiarize yourself with this document.
 
-## Release notes
+## Release Notes
 
-Release notes are available [here](https://github.com/redhat-cop/network.bgp/blob/main/CHANGELOG.rst).
+Release notes are available [here](https://github.com/redhat-cop/network.reports/blob/main/CHANGELOG.rst).
 
-## Related information
+## Related Information
 
 - [Developing network resource modules](https://github.com/ansible-network/networking-docs/blob/main/rm_dev_guide.md)
 - [Ansible Networking docs](https://github.com/ansible-network/networking-docs)
@@ -353,6 +169,10 @@ Release notes are available [here](https://github.com/redhat-cop/network.bgp/blo
 - [Ansible Community Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html)
 
 ## Licensing
+
+GNU General Public License v3.0 or later.
+
+See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
 
 GNU General Public License v3.0 or later.
 
