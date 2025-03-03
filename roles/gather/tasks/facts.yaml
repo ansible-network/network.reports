@@ -6,10 +6,6 @@
     state: gathered
   register: gather_result
 
-# - name: Append resource facts to a global list
-#   ansible.builtin.set_fact:
-#     all_gathered_facts: "{{ all_gathered_facts | default([]) + [gather_result] }}"
-
 - name: Append resource facts to a global dictionary
   ansible.builtin.set_fact:
     all_gathered_facts: >-
@@ -19,8 +15,29 @@
   ansible.builtin.debug:
     msg: "{{ gather_result }}"
 
+# Generate reports in specified formats
+- name: Set default formats if not specified
+  ansible.builtin.set_fact:
+    format: ["yaml"]
+  when: format is undefined
 
+- name: Create reports directory
+  ansible.builtin.file:
+    path: "{{ reports_dir | default('/tmp/network_reports') }}/{{ inventory_hostname }}"
+    state: directory
+    mode: "0755"
+  delegate_to: localhost
 
-# - name: Build a report
-#   ansible.builtin.include_role:
-#     name: "/home/rothakur/ansible-collections/collections/ansible_collections/network/reports/roles/build_report_container"
+- name: Generate YAML reports
+  ansible.builtin.copy:
+    content: "{{ all_gathered_facts | to_nice_yaml }}"
+    dest: "{{ reports_dir | default('/tmp/network_reports') }}/{{ inventory_hostname }}/network_facts.yaml"
+  delegate_to: localhost
+  when: "'yaml' in format"
+
+- name: Generate JSON reports
+  ansible.builtin.copy:
+    content: "{{ all_gathered_facts | to_nice_json }}"
+    dest: "{{ reports_dir | default('/tmp/network_reports') }}/{{ inventory_hostname }}/network_facts.json"
+  delegate_to: localhost
+  when: "'json' in format"

@@ -11,7 +11,13 @@
 - name: Include selinux role
   vars:
     selinux_fcontexts:
-      - {target: '{{ file_path }}(/.*)?', setype: 'httpd_sys_content_t', state: 'present'}
+      - {
+          target: "{{ file_path }}(/.*)?",
+          setype: "httpd_sys_content_t",
+          state: "present",
+        }
+    ansible_python_interpreter: /usr/bin/python3
+
   ansible.builtin.include_role:
     name: fedora.linux_system_roles.selinux
 

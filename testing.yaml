@@ -1,0 +1,12 @@
+---
+- name: Gather structured facts for network resources
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Invoke gather role
+      ansible.builtin.include_role:
+        name: network.reports.gather
+      vars:
+        resources:
+          - "bgp_global"
+          - "bgp_address_family"

@@ -38,32 +38,7 @@
             <button class="tab-button" data-target="l3_interfaces">L3 Interfaces</button>
         </div>
 
-        <!-- Interfaces Tab -->
-        <div id="interfaces" class="tab-content">
-            <h2>Interfaces</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Interface Name</th>
-                        <th>Status</th>
-                        <th>Speed</th>
-                        <th>Duplex</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for interface in all_gathered_facts.interfaces %}
-                    <tr>
-                        <td>{{ interface.name }}</td>
-                        <td class="{% if interface.enabled %}enabled{% else %}disabled{% endif %}">
-                            {{ "Enabled" if interface.enabled else "Disabled" }}
-                        </td>
-                        <td>{{ interface.speed | default('N/A') }}</td>
-                        <td>{{ interface.duplex | default('N/A') }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    
 
         <!-- L2 Interfaces Tab -->
         <div id="l2_interfaces" class="tab-content">
