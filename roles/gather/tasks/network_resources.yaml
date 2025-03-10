@@ -1,0 +1,4 @@
+---
+# network_resources.yaml
+- name: Include gather tasks
+  ansible.builtin.include_tasks: gather.yaml

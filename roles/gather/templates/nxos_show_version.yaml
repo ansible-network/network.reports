@@ -1,0 +1,72 @@
+# fmt: off
+[
+  {
+    "name": "nxos_version",
+    "getval": '''\s\sNXOS: version (?P<nxos_version>\S+)(\s+\[(?P<release_type>[^\]]+)\])?''',
+    "result":
+      {
+        "nxos_version": "{{ nxos_version }}",
+        "release_type": "{{ release_type }}",
+      },
+  },
+  {
+    "name": "nxos_image_file",
+    "getval": '''\s\sNXOS image file is: (?P<nxos_image_file>.+)$''',
+    "result": { "nxos_image_file": "{{ nxos_image_file }}" },
+  },
+  {
+    "name": "nxos_compile_time",
+    "getval": '''\s\sNXOS compile time:\s+(?P<nxos_compile_time>.+)$''',
+    "result": { "nxos_compile_time": "{{ nxos_compile_time }}" },
+  },
+  {
+    "name": "chassis",
+    "getval": '''\s\scisco (?P<chassis>\S+\s+\S+) Chassis''',
+    "result": { "hardware": { "chassis": "{{ chassis }}" } },
+  },
+  {
+    "name": "processor",
+    "getval": '''(?P<processor_type>.+?) with (?P<memory>\d+) kB of memory''',
+    "result":
+      {
+        "processor":
+          { "type": "{{ processor_type | trim }}", "memory": "{{ memory }}" },
+      },
+  },
+  {
+    "name": "processor_board_id",
+    "getval": '''\s\sProcessor Board ID (?P<processor_board_id>\S+)$''',
+    "result":
+      { "hardware": { "processor_board_id": "{{ processor_board_id }}" } },
+  },
+  {
+    "name": "device_name",
+    "getval": '''\s\sDevice name: (?P<device_name>\S+)$''',
+    "result": { "device_name": "{{ device_name }}" },
+  },
+  {
+    "name": "bootflash",
+    "getval": '''\s\sbootflash:\s+(?P<bootflash>\d+) kB''',
+    "result": { "bootflash": "{{ bootflash }}" },
+  },
+  {
+    "name": "uptime",
+    "getval": '''Kernel uptime is (?P<days>\d+) day\(s\), (?P<hours>\d+) hour\(s\), (?P<minutes>\d+) minute\(s\), (?P<seconds>\d+) second\(s\)''',
+    "result":
+      {
+        "uptime":
+          {
+            "days": "{{ days }}",
+            "hours": "{{ hours }}",
+            "minutes": "{{ minutes }}",
+            "seconds": "{{ seconds }}",
+          },
+      },
+  },
+  {
+    "name": "last_reset_reason",
+    "getval": '''\s\sReason: (?P<last_reset_reason>.+)$''',
+    "result": { "last_reset_reason": "{{ last_reset_reason }}" },
+  },
+]
+# fmt: on

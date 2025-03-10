@@ -1,0 +1,7 @@
+---
+- name: Parse show verison
+  ansible.utils.cli_parse:
+    command: "show version"
+    parser:
+      name: ansible.netcommon.content_templates
+    set_fact: system_resources

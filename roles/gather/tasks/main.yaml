@@ -1,6 +1,21 @@
 ---
-- name: Include tasks
-  ansible.builtin.include_tasks: validation.yaml
+# roles/network/reports/gather/tasks/main.yml
 
-- name: Run the platform specific tasks
-  ansible.builtin.include_tasks: gather.yaml
+# Include validation and basic checks
+- name: Include validation tasks
+  ansible.builtin.include_tasks: validation.yaml
+# Include common network resources that apply to all platforms using network.base.gather
+
+- name: Include network resource tasks
+  ansible.builtin.include_tasks: network_resources.yaml
+
+- name: Include system resouces tasks
+  ansible.builtin.include_tasks: system_resources.yaml
+
+- name: Add system resources to all_gathered_facts
+  ansible.builtin.set_fact:
+    all_gathered_facts: "{{ all_gathered_facts | combine(system_resources) }}"
+
+- name: Debug combined facts
+  ansible.builtin.debug:
+    var: all_gathered_facts
