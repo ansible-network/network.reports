@@ -1,0 +1,9 @@
+- name: Parse show version
+  ansible.utils.cli_parse:
+    command: "show version"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: system_resources
+# - name: Combine data into system_resources
+#   ansible.builtin.set_fact:
+#     system_resources: "{{ version_data | combine(resources_data, recursive=True) }}"

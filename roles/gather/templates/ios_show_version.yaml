@@ -1,0 +1,101 @@
+---
+- name: "ios_xe_version"
+  getval: "Cisco\\sIOS\\sXE\\sSoftware,\\sVersion\\s(?P<version>\\S+)"
+  result:
+    software_version: "{{ version }}"
+- name: "ios_version"
+  getval: "Cisco\\sIOS\\sSoftware\\s\\[IOSXE\\],\\s(?P<product>.*),\\sVersion\\s(?P<detailed_version>[^,]+)"
+  result:
+    detailed_info:
+      product: "{{ product }}"
+      detailed_version: "{{ detailed_version }}"
+- name: "release_info"
+  getval: "RELEASE\\sSOFTWARE\\s\\((?P<release_tag>[^\\)]+)\\)"
+  result:
+    detailed_info:
+      release_tag: "{{ release_tag }}"
+- name: "compile_info"
+  getval: "Compiled\\s(?P<compile_day>\\S+)\\s(?P<compile_date>\\S+)\\s(?P<compile_time>[^\\s]+)\\sby\\s(?P<compiler>\\S+)"
+  result:
+    build_info:
+      compiled_by: "{{ compiler }}"
+      compiled_date: "{{ compile_day }} {{ compile_date }} {{ compile_time }}"
+- name: "uptime"
+  getval: "(?P<hostname>\\S+)\\suptime\\sis\\s(?P<weeks>\\d+)\\sweeks,\\s(?P<hours>\\d+)\\shours,\\s(?P<minutes>\\d+)\\sminutes"
+  result:
+    uptime:
+      hostname: "{{ hostname }}"
+      weeks: "{{ weeks }}"
+      hours: "{{ hours }}"
+      minutes: "{{ minutes }}"
+- name: "control_processor"
+  getval: "Uptime\\sfor\\sthis\\scontrol\\sprocessor\\sis\\s(?P<weeks>\\d+)\\sweeks,\\s(?P<hours>\\d+)\\shours,\\s(?P<minutes>\\d+)\\sminutes"
+  result:
+    control_processor_uptime:
+      weeks: "{{ weeks }}"
+      hours: "{{ hours }}"
+      minutes: "{{ minutes }}"
+- name: "reload_reason"
+  getval: "System\\sreturned\\sto\\sROM\\sby\\s(?P<reload_reason>.*)"
+  result:
+    reload_reason: "{{ reload_reason }}"
+- name: "last_reload"
+  getval: "Last\\sreload\\sreason:\\s(?P<last_reload>.*)"
+  result:
+    last_reload_reason: "{{ last_reload }}"
+- name: "image_file"
+  getval: "System\\simage\\sfile\\sis\\s\"(?P<image_file>.*)\""
+  result:
+    system_image: "{{ image_file }}"
+- name: "license_level"
+  getval: "License\\sLevel:\\s(?P<license_level>.*)"
+  result:
+    license:
+      level: "{{ license_level | default('') | trim }}"
+- name: "license_type"
+  getval: "License\\sType:\\s(?P<license_type>.*)"
+  result:
+    license:
+      type: "{{ license_type }}"
+- name: "smart_licensing"
+  getval: "Smart\\sLicensing\\sStatus:\\s(?P<smart_license>.*)"
+  result:
+    license:
+      smart_licensing: "{{ smart_license }}"
+- name: "hardware"
+  getval: "cisco\\s(?P<platform>\\S+)\\s\\((?P<processor>[^\\)]+)\\)\\sprocessor.*with\\s(?P<memory>[^\\s]+)"
+  result:
+    hardware:
+      platform: "{{ platform }}"
+      processor: "{{ processor }}"
+      memory: "{{ memory }}"
+- name: "processor_board"
+  getval: "Processor\\sboard\\sID\\s(?P<board_id>\\S+)"
+  result:
+    hardware:
+      processor_board_id: "{{ board_id }}"
+- name: "interfaces"
+  getval: "(?P<interface_count>\\d+)\\s(?P<interface_type>.*?)\\sinterfaces"
+  result:
+    interfaces:
+      count: "{{ interface_count }}"
+      type: "{{ interface_type }}"
+- name: "nvram"
+  getval: "(?P<nvram>\\d+K)\\sbytes\\sof\\snon-volatile\\sconfiguration\\smemory"
+  result:
+    memory:
+      nvram: "{{ nvram }}"
+- name: "physical_memory"
+  getval: "(?P<physical>\\d+K)\\sbytes\\sof\\sphysical\\smemory"
+  result:
+    memory:
+      physical: "{{ physical }}"
+- name: "bootflash"
+  getval: "(?P<bootflash>\\d+K)\\sbytes\\sof\\svirtual\\shard\\sdisk\\sat\\sbootflash:"
+  result:
+    memory:
+      bootflash: "{{ bootflash }}"
+- name: "config_register"
+  getval: "Configuration\\sregister\\sis\\s(?P<config_reg>0x\\S+)"
+  result:
+    config_register: "{{ config_reg }}"
