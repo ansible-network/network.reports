@@ -19,3 +19,13 @@
 - name: Debug combined facts
   ansible.builtin.debug:
     var: all_gathered_facts
+
+  #Display all gathered facts in JSON format
+- name: Display gathered facts as JSON
+  ansible.builtin.debug:
+    msg: "{{ all_gathered_facts | to_json }}"
+
+# Display all gathered facts in XML format
+- name: Display gathered facts as XML
+  ansible.builtin.debug:
+    msg: "{{ all_gathered_facts | to_nice_yaml }}"

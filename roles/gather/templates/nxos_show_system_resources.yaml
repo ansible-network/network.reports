@@ -1,14 +1,6 @@
 ---
-- name: "cpu_states"
-  getval: "CPU states\\s+:\\s+(?P<cpu_user>\\d+\\.\\d+)% user,\\s+(?P<cpu_kernel>\\d+\\.\\d+)% kernel,\\s+(?P<cpu_idle>\\d+\\.\\d+)% idle"
-  result:
-    cpu:
-      user_percent: "{{ cpu_user }}"
-      kernel_percent: "{{ cpu_kernel }}"
-      idle_percent: "{{ cpu_idle }}"
-
 - name: "memory_usage"
-  getval: "Memory\\susage:\\s+(?P<mem_total>\\d+K)\\stotal,\\s+(?P<mem_used>\\d+K)\\sused,\\s+(?P<mem_free>\\d+K)\\sfree"
+  getval: "Memory usage:\\s+(?P<mem_total>\\d+K)\\s+total,\\s+(?P<mem_used>\\d+K)\\s+used,\\s+(?P<mem_free>\\d+K)\\s+free"
   result:
     memory:
       total_kb: "{{ mem_total }}"
@@ -16,8 +8,8 @@
       used_kb: "{{ mem_used }}"
 
 - name: "process_counts"
-  getval: "Processes\\s+:\\s+(?P<total>\\d+)\\stotal,\\s(?P<running>\\d+)\\srunning"
+  getval: "Processes\\s+:\\s+(?P<total>\\d+)\\s+total,\\s+(?P<running>\\d+)\\s+running"
   result:
     processes:
-      running: "{{ running }}"
       total: "{{ total }}"
+      running: "{{ running }}"

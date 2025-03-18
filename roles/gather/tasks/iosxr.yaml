@@ -3,7 +3,15 @@
     command: "show version"
     parser:
       name: ansible.netcommon.native
-    set_fact: system_resources
-# - name: Combine data into system_resources
-#   ansible.builtin.set_fact:
-#     system_resources: "{{ version_data | combine(resources_data, recursive=True) }}"
+    set_fact: version_data
+
+- name: Parse memory memory_summary
+  ansible.utils.cli_parse:
+    command: "show memory summary"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: memory_resources
+
+- name: Combine data into system_resources
+  ansible.builtin.set_fact:
+    system_resources: "{{ version_data | combine(memory_resources, recursive=True) }}"

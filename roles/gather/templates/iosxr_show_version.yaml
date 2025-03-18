@@ -34,10 +34,9 @@
     build_info:
       label: "{{ label }}"
 - name: "hardware"
-  getval: "cisco\\s(?P<platform>\\S+)\\s(?P<processor>.*)\\)\\sprocessor"
+  getval: "cisco\\s(?P<processor>.*)\\sprocessor"
   result:
     hardware:
-      platform: "{{ platform }}"
       processor: "{{ processor }}"
 - name: "uptime"
   getval: "System\\suptime\\sis\\s(?P<weeks>\\d+)\\sweeks\\s(?P<days>\\d+)\\sdays\\s(?P<hours>\\d+)\\shours\\s(?P<minutes>\\d+)\\sminutes"
