@@ -64,14 +64,32 @@ ansible-galaxy collection install network.reports
       ansible.builtin.include_role:
         name: network.reports.gather
       vars:
-        format:
-          - yaml
-          - json
         resources:
           - interfaces
           - l2_interfaces
           - bgp_global
 ```
+#### Example playbook for using network.reports.gather role
+```yaml
+- name: Gather network resources 
+  hosts: network_devices
+  gather_facts: false
+  tasks:
+    - name: Collect network resource facts
+      ansible.builtin.include_role:
+        name: network.reports.gather
+      vars:
+        resources:
+          - interfaces
+          - bgp_global
+          - l2_interfaces
+```
+This playbook:
+
+- Runs the gather role against network_devices
+- Collects facts for interfaces, BGP global configuration, and L2 interfaces
+- Outputs the data in both YAML and JSON formats
+- Displays the gathered interface and BGP information for verification
 
 ### 2. Generate HTML Reports from Network Facts
 - Convert collected facts into **HTML web reports** using Jinja2 templates.
@@ -79,16 +97,34 @@ ansible-galaxy collection install network.reports
 
 ```yaml
 - name: Generate Network HTML Report
-  hosts: network_devices
+  hosts: localhost
   gather_facts: false
   tasks:
     - name: Generate Network Report
       ansible.builtin.include_role:
         name: network.reports.generate_web_report
-      vars:
-        file_path: "./network_reports"
 ```
+#### Example playbook for using network.reports.generate_web_report
+```yaml
+- name: generate web network reports
+  hosts: localhost
+  become: true
+  vars:
+    all_gathered_facts: "{{ hostvars['ansible-1'] | default({}) }}"
+  tasks:
+   - name: Generate Network Report
+      ansible.builtin.include_role:
+        name: network.reports.generate_web_report
+```
+This playbook:
 
+- Runs on localhost (since it's generating the report locally)
+- Uses become: true to ensure proper permissions for file operations
+- Pulls the network facts from a previous gather operation stored in hostvars
+- Customizes the report location and web port
+- Displays the gathered facts for verification before generating the report
+- Calls the generate_web_report role with custom title, description, and sections
+  
 ### 3. Persist Network Reports to SCM (GitHub/GitLab)
 - Persist generated reports into **GitHub** or **GitLab** repositories for version control and audit.
 
@@ -109,6 +145,20 @@ ansible-galaxy collection install network.reports
               name: "{{ git_user_name }}"
               email: "{{ git_user_email }}"
 ```
+#### Example playbook for using network.reports.persist
+```yaml
+- name: persist
+  hosts: ansible-1
+  become: true
+  tasks:
+    - name: Persist report
+      ansible.builtin.include_role:
+        name: network.reports.persist
+```
+This playbook:
+  - First gathers the network resources using the gather role
+  - Then persists the gathered information using the persist role
+  - Specifies both local file storage and SCM repository details
 
 ## Testing
 
