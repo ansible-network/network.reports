@@ -13,6 +13,13 @@
 
 ![Screenshot from 2025-02-11 17-30-19](https://github.com/user-attachments/assets/8f822ffd-519b-4cf8-915b-9c73351d46a5)
 
+These playbooks demonstrate how to use the three roles you requested:
+
+- gather: Collects network facts and configuration from devices and also allows you to specify which resource modules to gather
+
+- persist:Saves gathered network facts and configurations to various storage backends and also supports local filesystem and Git repositories.
+
+- generate_web_report:Creates interactive web reports from gathered network data
 
 
 ## Requirements
@@ -25,6 +32,19 @@
   - [cisco.iosxr](https://github.com/ansible-collections/cisco.iosxr)
   - [cisco.nxos](https://github.com/ansible-collections/cisco.nxos)
   - [junipernetworks.junos](https://github.com/ansible-collections/junipernetworks.junos)
+
+## Included content
+
+Click on the name of a role to view its documentation:
+
+<!--start collection content-->
+### Roles
+Name | Description
+--- | ---
+[network.reports.gather](https://github.com/ansible-network/network.reports/tree/main/roles/gather) | For collecting structured facts and configurations.
+[network.reports.generate_web_report](roles/configure/README.md) | For creating web-based reports from the data.
+[network.reports.persist](https://github.com/AAYUSH2091/network.reports/blob/patch-1/roles/persist/README.md) | For saving and versioning the collected data
+<!--end collection content-->
 
 ## Installation
 To consume this Validated Content from Automation Hub, the following needs to be added to `ansible.cfg`:
