@@ -1,0 +1,6 @@
+---
+- name: Run Gather Role tests
+  hosts: ansible-1
+  gather_facts: false
+  roles:
+    - tests

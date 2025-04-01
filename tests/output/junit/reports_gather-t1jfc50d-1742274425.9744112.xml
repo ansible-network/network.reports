@@ -1,0 +1,186 @@
+<?xml version="1.0" ?>
+<testsuites disabled="0" errors="1" failures="0" tests="18" time="67.8297870159149169921875">
+	<testsuite disabled="0" errors="1" failures="0" name="reports_gather-t1jfc50d" skipped="1" tests="18" time="67.8297870159149169921875">
+		<testcase classname="tests/integration/targets/reports_gather/tasks/main.yml:2" name="[ansible-1] reports: reports_gather : Debug msg=START network.reports gather operation integration tests on connection={{ ansible_connection }}" time="0.17450785636901855">
+			<system-out>{
+    &quot;changed&quot;: false,
+    &quot;msg&quot;: &quot;START network.reports gather operation integration tests on connection=ansible.netcommon.network_cli&quot;
+}</system-out>
+		</testcase>
+		<testcase classname="tests/integration/targets/reports_gather/tasks/main.yml:8" name="[ansible-1] reports: Run network.reports.gather role to collect interface information name=network.reports.gather" time="0.017028331756591797">
+			<system-out>{
+    &quot;changed&quot;: false,
+    &quot;include_args&quot;: {
+        &quot;name&quot;: &quot;network.reports.gather&quot;
+    }
+}</system-out>
+		</testcase>
+		<testcase classname="tests/integration/targets/reports_gather/tasks/main.yml:8" name="[include] reports: Run network.reports.gather role to collect interface information name=network.reports.gather" time="0.034424543380737305">
+			<system-out>network.reports.gather (args={} vars={}): [ansible-1]</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:main.yaml:5" name="[ansible-1] reports: network.reports.gather : Include validation tasks _raw_params=validation.yaml" time="0.015055179595947266">
+			<system-out>{
+    &quot;changed&quot;: false,
+    &quot;include&quot;: &quot;validation.yaml&quot;,
+    &quot;include_args&quot;: {}
+}</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:main.yaml:5" name="[include] reports: network.reports.gather : Include validation tasks _raw_params=validation.yaml" time="0.022048473358154297">
+			<system-out>/home/aaanand/ansible-dev-workspace/collections/ansible_collections/network/reports/roles/gather/tasks/validation.yaml (args={} vars={}): [ansible-1]</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:validation.yaml:2" name="[ansible-1] reports: network.reports.gather : Set supported platform list supported_platforms=['ios', 'junos', 'eos', 'nxos', 'iosxr', 'vyos']" time="0.11194944381713867">
+			<system-out>{
+    &quot;ansible_facts&quot;: {
+        &quot;supported_platforms&quot;: [
+            &quot;ios&quot;,
+            &quot;junos&quot;,
+            &quot;eos&quot;,
+            &quot;nxos&quot;,
+            &quot;iosxr&quot;,
+            &quot;vyos&quot;
+        ]
+    },
+    &quot;changed&quot;: false
+}</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:validation.yaml:12" name="[ansible-1] reports: network.reports.gather : Conditional test _raw_params=unsupported_platform.yaml" time="0.013798713684082031">
+			<skipped>Conditional result was False</skipped>
+		</testcase>
+		<testcase classname="out-of-tree:main.yaml:9" name="[ansible-1] reports: network.reports.gather : Include network resource tasks _raw_params=network_resources.yaml" time="0.01037287712097168">
+			<system-out>{
+    &quot;changed&quot;: false,
+    &quot;include&quot;: &quot;network_resources.yaml&quot;,
+    &quot;include_args&quot;: {}
+}</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:main.yaml:9" name="[include] reports: network.reports.gather : Include network resource tasks _raw_params=network_resources.yaml" time="0.013831615447998047">
+			<system-out>/home/aaanand/ansible-dev-workspace/collections/ansible_collections/network/reports/roles/gather/tasks/network_resources.yaml (args={} vars={}): [ansible-1]</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:network_resources.yaml:3" name="[ansible-1] reports: network.reports.gather : Include gather tasks _raw_params=gather.yaml" time="0.011018753051757812">
+			<system-out>{
+    &quot;changed&quot;: false,
+    &quot;include&quot;: &quot;gather.yaml&quot;,
+    &quot;include_args&quot;: {}
+}</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:network_resources.yaml:3" name="[include] reports: network.reports.gather : Include gather tasks _raw_params=gather.yaml" time="0.019283771514892578">
+			<system-out>/home/aaanand/ansible-dev-workspace/collections/ansible_collections/network/reports/roles/gather/tasks/gather.yaml (args={} vars={}): [ansible-1]</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:gather.yaml:2" name="[ansible-1] reports: network.reports.gather : Gather the supported resource modules os_name={{ ansible_network_os }}" time="0.7054994106292725">
+			<system-out>{
+    &quot;ansible_connection&quot;: &quot;ansible.netcommon.network_cli&quot;,
+    &quot;ansible_network_os&quot;: &quot;cisco.iosxr.iosxr&quot;,
+    &quot;changed&quot;: false,
+    &quot;modules&quot;: [
+        &quot;acl_interfaces&quot;,
+        &quot;acls&quot;,
+        &quot;bgp_address_family&quot;,
+        &quot;bgp_global&quot;,
+        &quot;bgp_neighbor_address_family&quot;,
+        &quot;bgp_templates&quot;,
+        &quot;hostname&quot;,
+        &quot;interfaces&quot;,
+        &quot;l2_interfaces&quot;,
+        &quot;l3_interfaces&quot;,
+        &quot;lacp&quot;,
+        &quot;lacp_interfaces&quot;,
+        &quot;lag_interfaces&quot;,
+        &quot;lldp_global&quot;,
+        &quot;lldp_interfaces&quot;,
+        &quot;logging_global&quot;,
+        &quot;ntp_global&quot;,
+        &quot;ospf_interfaces&quot;,
+        &quot;ospfv2&quot;,
+        &quot;ospfv3&quot;,
+        &quot;prefix_lists&quot;,
+        &quot;route_maps&quot;,
+        &quot;snmp_server&quot;,
+        &quot;static_routes&quot;,
+        &quot;vrf_address_family&quot;,
+        &quot;vrf_global&quot;
+    ]
+}</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:gather.yaml:7" name="[ansible-1] reports: network.reports.gather : Set Resources gather_resources={{ gather_network_resources_list['modules'] }}" time="0.09135627746582031">
+			<system-out>{
+    &quot;ansible_facts&quot;: {
+        &quot;gather_resources&quot;: [
+            &quot;acl_interfaces&quot;,
+            &quot;acls&quot;,
+            &quot;bgp_address_family&quot;,
+            &quot;bgp_global&quot;,
+            &quot;bgp_neighbor_address_family&quot;,
+            &quot;bgp_templates&quot;,
+            &quot;hostname&quot;,
+            &quot;interfaces&quot;,
+            &quot;l2_interfaces&quot;,
+            &quot;l3_interfaces&quot;,
+            &quot;lacp&quot;,
+            &quot;lacp_interfaces&quot;,
+            &quot;lag_interfaces&quot;,
+            &quot;lldp_global&quot;,
+            &quot;lldp_interfaces&quot;,
+            &quot;logging_global&quot;,
+            &quot;ntp_global&quot;,
+            &quot;ospf_interfaces&quot;,
+            &quot;ospfv2&quot;,
+            &quot;ospfv3&quot;,
+            &quot;prefix_lists&quot;,
+            &quot;route_maps&quot;,
+            &quot;snmp_server&quot;,
+            &quot;static_routes&quot;,
+            &quot;vrf_address_family&quot;,
+            &quot;vrf_global&quot;
+        ]
+    },
+    &quot;changed&quot;: false
+}</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:gather.yaml:12" name="[ansible-1] reports: network.reports.gather : Set network resources gather_network_resources={{ gather_network_resources_list['modules'] | ansible.utils.param_list_compare(resources) }}" time="0.10598540306091309">
+			<system-out>{
+    &quot;ansible_facts&quot;: {
+        &quot;gather_network_resources&quot;: {
+            &quot;actionable&quot;: [
+                &quot;interfaces&quot;
+            ],
+            &quot;unsupported&quot;: []
+        }
+    },
+    &quot;changed&quot;: false
+}</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:gather.yaml:16" name="[ansible-1] reports: network.reports.gather : Initialize all_gathered_facts as an empty dictionary all_gathered_facts={}" time="0.08332967758178711">
+			<system-out>{
+    &quot;ansible_facts&quot;: {
+        &quot;all_gathered_facts&quot;: {}
+    },
+    &quot;changed&quot;: false
+}</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:gather.yaml:20" name="[ansible-1] reports: network.reports.gather : Include build tasks _raw_params=facts.yaml" time="0.04660606384277344">
+			<system-out>{
+    &quot;changed&quot;: false,
+    &quot;msg&quot;: &quot;All items completed&quot;,
+    &quot;results&quot;: [
+        {
+            &quot;ansible_loop_var&quot;: &quot;res&quot;,
+            &quot;include&quot;: &quot;facts.yaml&quot;,
+            &quot;include_args&quot;: {},
+            &quot;res&quot;: &quot;interfaces&quot;
+        }
+    ]
+}</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:gather.yaml:20" name="[include] reports: network.reports.gather : Include build tasks _raw_params=facts.yaml" time="0.0700373649597168">
+			<system-out>/home/aaanand/ansible-dev-workspace/collections/ansible_collections/network/reports/roles/gather/tasks/facts.yaml (args={} vars={'res': 'interfaces', 'ansible_loop_var': 'res', '_ansible_item_label': 'interfaces'}): [ansible-1]</system-out>
+		</testcase>
+		<testcase classname="out-of-tree:facts.yaml:2" name="[ansible-1] reports: network.reports.gather : Run the platform facts module os_name={{ ansible_network_os }}, name={{ ansible_network_os }}_{{ res }}, state=gathered" time="66.28365325927734">
+			<error message="    raise ConnectionError(to_text(msg, errors='surrogate_then_replace'), code=code)" type="error">  File &quot;/home/aaanand/ansible-dev-workspace/collections/ansible_collections/ansible/netcommon/plugins/module_utils/network/common/network.py&quot;, line 218, in get_capabilities
+    capabilities = Connection(module._socket_path).get_capabilities()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File &quot;/tmp/ansible-test-svwsgs_v/ansible/module_utils/connection.py&quot;, line 183, in __rpc__
+    raise ConnectionError(to_text(msg, errors='surrogate_then_replace'), code=code)
+</error>
+		</testcase>
+	</testsuite>
+</testsuites>

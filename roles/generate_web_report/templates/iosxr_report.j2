@@ -31,40 +31,24 @@
     <div class="sidebar">
         <h2>Device Information</h2>
         
-       <ul>
-    <li> Hostname : {{ hostvars[network_switch].all_gathered_facts.device_name }}</li>
-    
-    {% if hostvars[network_switch].all_gathered_facts.hardware.model is defined %}
-        <li> Model : {{ hostvars[network_switch].all_gathered_facts.hardware.model }}</li>
-   
-    {% endif %}
-    
-    {% if hostvars[network_switch].all_gathered_facts.os_type is defined %}
-        <li> IOS Type : {{ hostvars[network_switch].all_gathered_facts.os_type }}</li>
-   
-    {% endif %}
+        <ul>
+            <li> Hostname : {{ hostvars[network_switch].all_gathered_facts.device_name }}</li>
+            <li> Model : {{ hostvars[network_switch].all_gathered_facts.hardware.model }}</li>
+            <li> IOS Type : {{ hostvars[network_switch].all_gathered_facts.os_type }}</li>
+           {% if hostvars[network_switch].all_gathered_facts.hardware.serial_number is defined %}
+           <li> Serial Number : 
+            
+                {{ hostvars[network_switch].all_gathered_facts.hardware.serial_number }}
+            
+            </li>
+            {% endif %}
 
-    {% if hostvars[network_switch].all_gathered_facts.hardware.serial_number is defined %}
-        <li> Serial Number : {{ hostvars[network_switch].all_gathered_facts.hardware.serial_number }}</li>
-   
-    {% endif %}
 
-    {% if hostvars[network_switch].all_gathered_facts.version is defined %}
-        <li> Version : {{ hostvars[network_switch].all_gathered_facts.version }}</li>
-    
-    {% endif %}
+            <li> Version : {{ hostvars[network_switch].all_gathered_facts.version }} </li>
+            <li> Memory Free (MB) : {{ hostvars[network_switch].all_gathered_facts.memory.free_mb }} </li>
+            <li> Memory Total (MB) : {{ hostvars[network_switch].all_gathered_facts.memory.total_mb }} </li>
 
-    {% if hostvars[network_switch].all_gathered_facts.memory.free_mb is defined %}
-        <li> Memory Free (MB) : {{ hostvars[network_switch].all_gathered_facts.memory.free_mb }}</li>
-   
-    {% endif %}
-
-    {% if hostvars[network_switch].all_gathered_facts.memory.total_mb is defined %}
-        <li> Memory Total (MB) : {{ hostvars[network_switch].all_gathered_facts.memory.total_mb }}</li>
-    
-    {% endif %}
-</ul>
-
+        </ul>
 
         <h2> Devices </h2>
         <ul> 
@@ -120,8 +104,6 @@
     {% if hostvars[network_switch]['all_gathered_facts'].bgp_address_family is defined %}
         <button class="tab-button" data-target="bgp_address_family">BGP Address Family Configuration</button>
     {% endif %}
-
-
 
 </div>
 
@@ -259,43 +241,47 @@
 </div>
 
 <!-- OSPF Interfaces Tab -->
-
 <div id="ospf_interfaces" class="tab-content">
     <h2>OSPF Interfaces Configuration</h2>
     <table>
-    <thead>
-        <tr>
-            <th>Interface Name</th>
-            <th>Area ID</th>
-            <th>Address Family</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% if hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length > 0 %}
-        {% for interface in hostvars[network_switch]['all_gathered_facts'].ospf_interfaces %}
-            {% if interface.address_family is defined %}
-                {% for af in interface.address_family %}
-                    <tr>
-                        <td>{{ interface.name }}</td>
-                        <td>{{ af.area.area_id|default("Not Configured") }}</td>
-                        <td>{{ af.afi|default("Not Configured") }}</td>
-                    </tr>
-                {% endfor %}
-            {% else %}
+        <thead>
+            <tr>
+                <th>Interface Name</th>
+                <th>Process ID</th>
+                <th>Area ID</th>
+                <th>Address Family</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% if hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length > 0 %}
+            {% for interface in hostvars[network_switch]['all_gathered_facts'].ospf_interfaces %}
+                {% if interface.address_family is defined %}
+                    {% for af in interface.address_family %}
+                        {% if af.processes is defined %}
+                            {% for process in af.processes %}
+                            <tr>
+                                <td>{{ interface.name }}</td>
+                                <td>{{ process.process_id }}</td>
+                                <td>{{ process.area.area_id|default("Not Configured") }}</td>
+                                <td>{{ af.afi|default("Not Configured") }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
                 <tr>
                     <td>{{ interface.name }}</td>
-                    <td colspan="2">No OSPF configuration</td>
+                    <td colspan="3">No OSPF configuration</td>
                 </tr>
-            {% endif %}
-        {% endfor %}
-    {% elif hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length == 0 %}
-        <tr><td colspan="3">No OSPF interfaces are configured on this device</td></tr>
-    {% else %}
-        <tr><td colspan="3">No OSPF interface information available</td></tr>
-    {% endif %}
-    </tbody>
-</table>
-
+                {% endif %}
+            {% endfor %}
+        {% elif hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length == 0 %}
+            <tr><td colspan="4">No OSPF interfaces are configured on this device</td></tr>
+        {% else %}
+            <tr><td colspan="4">No OSPF interface information available</td></tr>
+        {% endif %}
+        </tbody>
+    </table>
 </div>
 
 <!-- OSPFv2 Tab -->
@@ -383,19 +369,10 @@
                 <td style="border: 1px solid #ddd; padding: 8px;">AS Number</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.as_number }}</td>
             </tr>
-            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.router_id is defined %}
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">Router ID</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.router_id }}</td>
-            </tr>
-            {% endif %}
-            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.router_id is defined %}
             <tr>
                 <td style="border: 1px solid #ddd; padding: 8px;">Router ID</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.router_id }}</td>
             </tr>
-            {% endif %}
-
             {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.timers is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.bgp is defined %}
             <tr>
                 <td style="border: 1px solid #ddd; padding: 8px;">Keepalive Timer</td>
@@ -406,20 +383,6 @@
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.bgp.holdtime }} seconds</td>
             </tr>
             {% endif %}
-
-            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.timers is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.keepalive_time is defined %}
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">Keepalive Timer</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.keepalive_time }} seconds</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">Holdtime</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.holdtime }} seconds</td>
-            </tr>
-
-            {% endif %}
-
-
             {% else %}
             <tr>
                 <td colspan="2" style="border: 1px solid #ddd; padding: 8px;">No BGP global configuration available</td>
@@ -433,109 +396,46 @@
 <!-- BGP Address Family Tab -->
 <div id="bgp_address_family" class="tab-content">
     <h2>BGP Address Family Configuration</h2>
-    {% if hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'arista.eos.eos' %}
-    <!-- Table for EOS Devices -->
     <table style="border-collapse: collapse; width: 100%;">
         <thead>
             <tr>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Neighbor Address</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Remote AS</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Maximum Received Routes</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">IPv4 Networks Configured</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Timers (Keepalive / Holdtime)</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Address Family</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Configured Networks</th>
             </tr>
         </thead>
         <tbody>
-            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global is defined %}
-                {% for neighbor in hostvars[network_switch]['all_gathered_facts'].bgp_global.neighbor %}
+            {% if hostvars[network_switch]['all_gathered_facts'].bgp_address_family is defined %}
+                {% if hostvars[network_switch]['all_gathered_facts'].bgp_address_family.address_family is defined %}
+                    {% for family in hostvars[network_switch]['all_gathered_facts'].bgp_address_family.address_family %}
                     <tr>
                         <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.neighbor_address }}
+                            <strong>{{ family.afi }} {{ family.safi }}</strong>
                         </td>
                         <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.remote_as }}
-                        </td>
-                        <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.maximum_received_routes.count }}
-                        </td>
-                        <td style="border: 1px solid #ddd; padding: 8px;">
-                            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.network is defined %}
+                            {% if family.networks is defined and family.networks|length > 0 %}
                                 <ul style="padding-left: 20px;">
-                                    {% for network in hostvars[network_switch]['all_gathered_facts'].bgp_global.network %}
-                                        {% if network.address is match("^\d+\.\d+\.\d+\.\d+") %}
-                                            <li>{{ network.address }}</li>
-                                        {% endif %}
+                                    {% for network in family.networks %}
+                                        <li>{{ network.prefix }}</li>
                                     {% endfor %}
                                 </ul>
                             {% else %}
-                                No IPv4 networks configured
+                                No networks configured
                             {% endif %}
                         </td>
-                        <td style="border: 1px solid #ddd; padding: 8px;">
-                            Keepalive: {{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.keepalive }} / Holdtime: {{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.holdtime }}    
-
-                        </td>
                     </tr>
-                {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="2" style="border: 1px solid #ddd; padding: 8px;">No address family information available</td>
+                    </tr>
+                {% endif %}
             {% else %}
                 <tr>
-                    <td colspan="5" style="border: 1px solid #ddd; padding: 8px;">No BGP global configuration available</td>
+                    <td colspan="2" style="border: 1px solid #ddd; padding: 8px;">No BGP address family configuration available</td>
                 </tr>
             {% endif %}
         </tbody>
     </table>
-
-{% elif hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'cisco.ios.ios' %}
-    <!-- Table for IOS Devices -->
-    <table style="border-collapse: collapse; width: 100%;">
-        <thead>
-            <tr>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Neighbor Address</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Remote AS</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Maximum Received Routes</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">IPv4 Networks Configured</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global is defined %}
-                {% for neighbor in hostvars[network_switch]['all_gathered_facts'].bgp_global.neighbor %}
-                    <tr>
-                        <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.neighbor_address }}
-                        </td>
-                        <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.remote_as }}
-                        </td>
-                        <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.maximum_received_routes.count }}
-                        </td>
-                        <td style="border: 1px solid #ddd; padding: 8px;">
-                            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.network is defined %}
-                                <ul style="padding-left: 20px;">
-                                    {% for network in hostvars[network_switch]['all_gathered_facts'].bgp_global.network %}
-                                        {% if network.address is match("^\d+\.\d+\.\d+\.\d+") %}
-                                            <li>{{ network.address }}</li>
-                                        {% endif %}
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                No IPv4 networks configured
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="4" style="border: 1px solid #ddd; padding: 8px;">No BGP global configuration available</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
-
-
-{% endif %}
-
-
 </div>
 
 

@@ -12,6 +12,13 @@
       name: ansible.netcommon.native
     set_fact: memory_resources
 
+- name: Parse hostname
+  ansible.utils.cli_parse:
+    command: "sh running-config | include hostname"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: hostname_resources
+
 - name: Combine data into system_resources
   ansible.builtin.set_fact:
-    system_resources: "{{ version_data | combine(memory_resources, recursive=True) }}"
+    system_resources: "{{ version_data | combine(memory_resources, hostname_resources, recursive=True) }}"

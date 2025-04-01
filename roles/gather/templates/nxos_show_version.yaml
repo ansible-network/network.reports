@@ -2,8 +2,12 @@
 - name: "nxos_version"
   getval: "\\s\\sNXOS: version (?P<nxos_version>\\S+)(\\s+\\[(?P<release_type>[^\\]]+)\\])?"
   result:
-    nxos_version: "{{ nxos_version }}"
+    version: "{{ nxos_version }}"
     release_type: "{{ release_type }}"
+- name: "nxos_os_type"
+  getval: "Cisco\\sNexus\\sOperating System\\s\\((?P<os_type>\\w+.\\w+)"
+  result:
+    os_type: "{{ os_type }}"
 
 - name: "nxos_image_file"
   getval: "\\s\\sNXOS image file is: (?P<nxos_image_file>.+)$"
@@ -19,7 +23,7 @@
   getval: "\\s\\scisco (?P<chassis>\\S+\\s+\\S+) Chassis"
   result:
     hardware:
-      chassis: "{{ chassis }}"
+      model: "{{ chassis }}"
 
 - name: "processor"
   getval: "(?P<processor_type>.+?) with (?P<memory>\\d+) kB of memory"
@@ -32,7 +36,7 @@
   getval: "\\s\\sProcessor Board ID (?P<processor_board_id>\\S+)$"
   result:
     hardware:
-      processor_board_id: "{{ processor_board_id }}"
+      serial_number: "{{ processor_board_id }}"
 
 - name: "device_name"
   getval: "\\s\\sDevice name: (?P<device_name>\\S+)$"

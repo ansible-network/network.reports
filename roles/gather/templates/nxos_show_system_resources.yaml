@@ -1,11 +1,11 @@
 ---
 - name: "memory_usage"
-  getval: "Memory usage:\\s+(?P<mem_total>\\d+K)\\s+total,\\s+(?P<mem_used>\\d+K)\\s+used,\\s+(?P<mem_free>\\d+K)\\s+free"
+  getval: "Memory usage:\\s+(?P<mem_total>\\d+)K\\s+total,\\s+(?P<mem_used>\\d+)K\\s+used,\\s+(?P<mem_free>\\d+)K\\s+free"
   result:
     memory:
-      total_kb: "{{ mem_total }}"
-      free_kb: "{{ mem_free }}"
-      used_kb: "{{ mem_used }}"
+      total_mb: "{{ (mem_total | float) / 1024 }}"
+      free_mb: "{{ (mem_free | float) / 1024 }}"
+      used_mb: "{{ (mem_used | float) / 1024 }}"
 
 - name: "process_counts"
   getval: "Processes\\s+:\\s+(?P<total>\\d+)\\s+total,\\s+(?P<running>\\d+)\\s+running"

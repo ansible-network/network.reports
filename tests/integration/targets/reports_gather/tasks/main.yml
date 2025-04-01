@@ -1,0 +1,32 @@
+---
+- name: Debug
+  ansible.builtin.debug:
+    msg: "START network.reports gather operation integration tests on connection={{ ansible_connection }}"
+
+- name: Perform gather operation for network resources
+  block:
+    - name: Run network.reports.gather role to collect interface information
+      ansible.builtin.include_role:
+        name: network.reports.gather
+      vars:
+        resources:
+          - "interfaces"
+      register: gather_result
+
+    - name: Verify gathered facts contains interfaces data
+      ansible.builtin.assert:
+        that:
+          - all_gathered_facts is defined
+          - all_gathered_facts.interfaces is defined
+          - all_gathered_facts.interfaces | type_debug == "list"
+        fail_msg: "Interfaces data was not properly gathered"
+        success_msg: "Interfaces data was successfully gathered"
+
+    - name: Display gathered interfaces
+      ansible.builtin.debug:
+        var: all_gathered_facts.interfaces
+        verbosity: 1
+
+- name: Debug
+  ansible.builtin.debug:
+    msg: "END network.reports gather operation integration tests on connection={{ ansible_connection }}"

@@ -1,8 +1,15 @@
 ---
 - name: "ios_xr_version"
-  getval: "Cisco\\sIOS\\sXR\\sSoftware,\\sVersion\\s(?P<version>\\S+)"
+  getval: "Cisco\\s(?P<os>\\w+\\s\\w+)\\sSoftware,\\sVersion\\s(?P<version>\\S+)"
   result:
-    software_version: "{{ version }}"
+    version: "{{ version }}"
+    os_type: "{{ os }}"
+
+- name: "model_type"
+  getval: "(?P<model>\\S+\\s\\S+\\s\\S+)\\s\\(\\)\\sprocessor"
+  result:
+    hardware:
+      model: "{{ model }}"
 - name: "build_info"
   getval: "\\sBuilt\\sBy\\s+:\\s(?P<built_by>\\S+)"
   result:
@@ -34,10 +41,8 @@
     build_info:
       label: "{{ label }}"
 - name: "hardware"
-  getval: "cisco\\s(?P<processor>.*)\\sprocessor"
-  result:
-    hardware:
-      processor: "{{ processor }}"
+  getval: "cisco\\s(?P<model>.*)\\(\\)\\sprocessor"
+
 - name: "uptime"
   getval: "System\\suptime\\sis\\s(?P<weeks>\\d+)\\sweeks\\s(?P<days>\\d+)\\sdays\\s(?P<hours>\\d+)\\shours\\s(?P<minutes>\\d+)\\sminutes"
   result:

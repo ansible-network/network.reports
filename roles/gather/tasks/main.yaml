@@ -16,6 +16,10 @@
   ansible.builtin.set_fact:
     all_gathered_facts: "{{ all_gathered_facts | combine(system_resources) }}"
 
+- name: Add ansible_network_os to all_gathered_facts
+  ansible.builtin.set_fact:
+    all_gathered_facts: "{{ all_gathered_facts | combine({'ansible_network_os': ansible_network_os}) }}"
+
 - name: Debug combined facts
   ansible.builtin.debug:
     var: all_gathered_facts

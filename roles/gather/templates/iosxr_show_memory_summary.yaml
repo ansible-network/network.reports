@@ -1,14 +1,14 @@
 - name: "memory_summary_physical_total"
   getval: "\\sPhysical Memory:\\s+(?P<physical_total>\\d+M)\\s+total"
   result:
-    memory_summary:
-      physical_total: "{{ physical_total }}"
+    memory:
+      total_mb: "{{ physical_total }}"
 
 - name: "memory_summary_app_total"
   getval: "\\sApplication Memory :\\s+(?P<app_total>\\d+M)"
   result:
-    memory_summary:
-      app_total: "{{ app_total }}"
+    memory:
+      free_mb: "{{ app_total }}"
 
 - name: "memory_summary_image_size"
   getval: "\\sImage:\\s+(?P<image_size>\\d+M)"

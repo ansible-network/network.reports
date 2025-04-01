@@ -2,7 +2,7 @@
 - name: "ios_xe_version"
   getval: "Cisco\\sIOS\\sXE\\sSoftware,\\sVersion\\s(?P<version>\\S+)"
   result:
-    software_version: "{{ version }}"
+    version: "{{ version }}"
 - name: "ios_version"
   getval: "Cisco\\sIOS\\sSoftware\\s\\[IOSXE\\],\\s(?P<product>.*),\\sVersion\\s(?P<detailed_version>[^,]+)"
   result:
@@ -63,23 +63,20 @@
     license:
       smart_licensing: "{{ smart_license }}"
 - name: "hardware"
-  getval: "cisco\\s(?P<platform>\\S+)\\s\\((?P<processor>[^\\)]+)\\)\\sprocessor.*with\\s(?P<memory>[^\\s]+)"
+  getval: "cisco\\s(?P<platform>\\S+)\\s\\((?P<processor>[^\\)]+)\\)\\sprocessor.*with\\s(?P<memory>\\d+)"
   result:
     hardware:
-      platform: "{{ platform }}"
+      model: " Cisco {{ platform }}"
       processor: "{{ processor }}"
-      memory: "{{ memory }}"
+    memory:
+      total_mb: "{{ (memory | float) / 1024 }}"
+
 - name: "processor_board"
   getval: "Processor\\sboard\\sID\\s(?P<board_id>\\S+)"
   result:
     hardware:
-      processor_board_id: "{{ board_id }}"
-- name: "interfaces"
-  getval: "(?P<interface_count>\\d+)\\s(?P<interface_type>.*?)\\sinterfaces"
-  result:
-    interfaces:
-      count: "{{ interface_count }}"
-      type: "{{ interface_type }}"
+      serial_number: "{{ board_id }}"
+
 - name: "nvram"
   getval: "(?P<nvram>\\d+K)\\sbytes\\sof\\snon-volatile\\sconfiguration\\smemory"
   result:

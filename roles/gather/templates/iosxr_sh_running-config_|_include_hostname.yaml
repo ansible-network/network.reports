@@ -1,0 +1,4 @@
+- name: "device_name"
+  getval: "hostname\\s(?P<device_name>\\w+)"
+  result:
+    device_name: "{{ device_name }}"

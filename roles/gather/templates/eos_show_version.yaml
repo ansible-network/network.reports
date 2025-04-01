@@ -22,7 +22,7 @@
 - name: "eos_software_version"
   getval: "^Software\\simage\\sversion:\\s(?P<software_version>.*)$"
   result:
-    software_version: "{{ software_version }}"
+    version: "{{ software_version }}"
 - name: "eos_architecture"
   getval: "^Architecture:\\s+(?P<architecture>\\S+)$"
   result:
@@ -50,9 +50,9 @@
   getval: "^Total\\smemory:\\s+(?P<total_memory>\\d+)\\skB$"
   result:
     memory:
-      total_memory: "{{ total_memory }}"
+      total_mb: "{{ (total_memory | float) / 1024 }}"
 - name: "eos_free_memory"
   getval: "^Free\\smemory:\\s+(?P<free_memory>\\d+)\\skB$"
   result:
     memory:
-      free_memory: "{{ free_memory }}"
+      free_mb: "{{ (free_memory | float) / 1024 }}"
