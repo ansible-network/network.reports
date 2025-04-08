@@ -1,53 +1,61 @@
 # persist
 
 ## Overview
+
 The `persist` role enables users to fetch facts for specified network resources and store them in a YAML-formatted structure. These host variables can be saved either locally or in a remote data store, acting as a single source of truth (SOT) for network configurations.
 
 ## Features
+
 - Fetch structured facts for specified resources.
 - Persist gathered facts to local directories or remote SCM repositories.
 - Enable centralized and version-controlled storage for network configuration data.
 
 ## Variables
 
-| Variable Name        | Default Value | Required | Type | Description                                                   | Example |
-|:---------------------|:-------------:|:--------:|:----:|:-------------------------------------------------------------|:-------:|
-| `ansible_network_os` | `""`          | no      | str  | Network OS for which the facts are being gathered.            | `"cisco.ios.ios"` |
-| `resources`          | `[all]`       | no       | list | List of resources for which facts need to be persisted.       | `['interfaces', 'bgp_global']` |
-| `data_store`         | `""`          | yes      | dict | Specifies the storage configuration (local or SCM).           | See examples below. |
+| Variable Name        | Default Value | Required | Type | Description                                             |            Example             |
+| :------------------- | :-----------: | :------: | :--: | :------------------------------------------------------ | :----------------------------: |
+| `ansible_network_os` |     `""`      |    no    | str  | Network OS for which the facts are being gathered.      |       `"cisco.ios.ios"`        |
+| `resources`          |    `[all]`    |    no    | list | List of resources for which facts need to be persisted. | `['interfaces', 'bgp_global']` |
+| `data_store`         |     `""`      |   yes    | dict | Specifies the storage configuration (local or SCM).     |      See examples below.       |
 
 ## Usage
+
 Below are examples demonstrating how to use the `persist` role:
 
 ### Example 1: Persist to Local Data Store
+
 In this example, gathered facts are stored in a local directory:
 
 ```yaml
-- name: Persist network facts to local data store
+- name: Gather structured facts for network resources
   hosts: all
-  gather_facts: true
+  gather_facts: false
   tasks:
-    - name: Invoke persist role
+    - name: Invoke gather role
       ansible.builtin.include_role:
-        name: network.base.persist
+        name: network.reports.gather
       vars:
-        ansible_network_os: cisco.ios.ios
         resources:
-          - 'interfaces'
-          - 'l2_interfaces'
-          - 'l3_interfaces'
-          - 'bgp_global'
-          - 'bgp_address_family'
-          - 'ospfv2'
-          - 'ospf_interfaces'
-          - 'ospfv3'
+          - "bgp_global"
+          - "bgp_address_family"
+
+- name: persist
+  hosts: all
+  become: true
+  tasks:
+    - name: Persist report
+      ansible.builtin.include_role:
+        name: network.reports.persist
+      vars:
         data_store:
           local: "~/data/network"
 ```
+
 Example Output
 When the playbook is executed, the persisted facts will be saved in the specified data store in a structured YAML format.
 
 ### Example 2: Persist to SCM repository
+
 In this example, gathered facts are stored in a remote Git repository:
 
 ```yaml
@@ -57,7 +65,7 @@ In this example, gathered facts are stored in a remote Git repository:
   tasks:
     - name: Invoke persist role
       ansible.builtin.include_role:
-        name: network.base.persist
+        name: network.reports.persist
       vars:
         data_store:
           scm:
@@ -69,6 +77,7 @@ In this example, gathered facts are stored in a remote Git repository:
                 name: "{{ gh_username }}"
                 email: "{{ gh_email }}"
 ```
+
 Example Output
 When the playbook is executed, the persisted facts will be saved in the specified data store in a structured YAML format.
 
