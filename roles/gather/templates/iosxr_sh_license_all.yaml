@@ -1,0 +1,35 @@
+- name: "license_name"
+  getval: "^\\((?P<license_name>[^)]+)\\):$"
+  result:
+    license:
+      name: "{{ license_name }}"
+
+- name: "license_description"
+  getval: "^\\s+Description: (?P<desc>.*)$"
+  result:
+    license:
+      description: "{{ desc | default('Not Provided') }}"
+
+- name: "license_count"
+  getval: "^\\s+Count: (?P<count>\\d+)$"
+  result:
+    license:
+      count: "{{ count | int }}"
+
+- name: "license_version"
+  getval: "^\\s+Version: (?P<ver>.+)$"
+  result:
+    license:
+      version: "{{ ver }}"
+
+- name: "license_status"
+  getval: "^\\s+Status: (?P<status>.+)$"
+  result:
+    license:
+      status: "{{ status }}"
+
+- name: "license_export_status"
+  getval: "^\\s+Export status: (?P<export_status>.+)$"
+  result:
+    license:
+      export_status: "{{ export_status }}"

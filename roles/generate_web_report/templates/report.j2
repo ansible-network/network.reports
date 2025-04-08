@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Network Automation Report</title>
     <link rel="stylesheet" type="text/css" href="css/main.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         $(document).ready(function(){
             $(".tab-content").hide();
@@ -31,341 +31,505 @@
     <div class="sidebar">
         <h2>Device Information</h2>
         
-       <ul>
-    <li> Hostname : {{ hostvars[network_switch].all_gathered_facts.device_name }}</li>
-    
-    {% if hostvars[network_switch].all_gathered_facts.hardware.model is defined %}
-        <li> Model : {{ hostvars[network_switch].all_gathered_facts.hardware.model }}</li>
-   
-    {% endif %}
-    
-    {% if hostvars[network_switch].all_gathered_facts.os_type is defined %}
-        <li> IOS Type : {{ hostvars[network_switch].all_gathered_facts.os_type }}</li>
-   
-    {% endif %}
+        <ul>
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch].all_gathered_facts.device_name is defined %}
+                <li> Hostname : {{ hostvars[network_switch].all_gathered_facts.device_name }}</li>
+            {% else %}
+                <li> Hostname : Not Available</li>
+            {% endif %}
+            
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch].all_gathered_facts.hardware is defined and hostvars[network_switch].all_gathered_facts.hardware.model is defined %}
+                <li> Model : {{ hostvars[network_switch].all_gathered_facts.hardware.model }}</li>
+            {% endif %}
+            
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch].all_gathered_facts.os_type is defined %}
+                <li> IOS Type : {{ hostvars[network_switch].all_gathered_facts.os_type }}</li>
+            {% endif %}
 
-    {% if hostvars[network_switch].all_gathered_facts.hardware.serial_number is defined %}
-        <li> Serial Number : {{ hostvars[network_switch].all_gathered_facts.hardware.serial_number }}</li>
-   
-    {% endif %}
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch].all_gathered_facts.hardware is defined and hostvars[network_switch].all_gathered_facts.hardware.serial_number is defined %}
+                <li> Serial Number : {{ hostvars[network_switch].all_gathered_facts.hardware.serial_number }}</li>
+            {% endif %}
 
-    {% if hostvars[network_switch].all_gathered_facts.version is defined %}
-        <li> Version : {{ hostvars[network_switch].all_gathered_facts.version }}</li>
-    
-    {% endif %}
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch].all_gathered_facts.version is defined %}
+                <li> Version : {{ hostvars[network_switch].all_gathered_facts.version }}</li>
+            {% endif %}
 
-    {% if hostvars[network_switch].all_gathered_facts.memory.free_mb is defined %}
-        <li> Memory Free (MB) : {{ hostvars[network_switch].all_gathered_facts.memory.free_mb }}</li>
-   
-    {% endif %}
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch].all_gathered_facts.memory is defined and hostvars[network_switch].all_gathered_facts.memory.free_mb is defined %}
+                <li> Memory Free (MB) : {{ hostvars[network_switch].all_gathered_facts.memory.free_mb }}</li>
+            {% endif %}
 
-    {% if hostvars[network_switch].all_gathered_facts.memory.total_mb is defined %}
-        <li> Memory Total (MB) : {{ hostvars[network_switch].all_gathered_facts.memory.total_mb }}</li>
-    
-    {% endif %}
-</ul>
-
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch].all_gathered_facts.memory is defined and hostvars[network_switch].all_gathered_facts.memory.total_mb is defined %}
+                <li> Memory Total (MB) : {{ hostvars[network_switch].all_gathered_facts.memory.total_mb }}</li>
+            {% endif %}
+        </ul>
 
         <h2> Devices </h2>
         <ul> 
-        <li>{{ hostvars[network_switch].ansible_host }} </li>
-        
+            {% if hostvars[network_switch].ansible_host is defined %}
+                <li>{{ hostvars[network_switch].ansible_host }} </li>
+            {% else %}
+                <li>Host information not available</li>
+            {% endif %}
         </ul>
     </div>
 
-
-
 <!-- Main Content -->
 <div class="main-content">
-<!-- Header -->
-<div class="header">
-    <img class="logo" src="webpage_logo.png" alt="Red Hat Ansible Automation Platform Logo">
-</div>
+    <!-- Header -->
+    <div class="header">
+        <img class="logo" src="webpage_logo.png" alt="Red Hat Ansible Automation Platform Logo">
+    </div>
 
-<h1>Network Report</h1>
+    <h1>Network Report</h1>
 
-<!-- PDF Download Button -->
-<button id="download-pdf" class="pdf-button">Download PDF Report</button>
+    <!-- PDF Download Button -->
+    <button id="download-pdf" class="pdf-button">Download PDF Report</button>
 
-<!-- Tabs -->
-<div class="tabs">
-    {% if hostvars[network_switch]['all_gathered_facts'].l2_interfaces is defined %}
-        <button class="tab-button active" data-target="interfaces">Interfaces</button>
-    {% endif %}
-
-    {% if hostvars[network_switch]['all_gathered_facts'].l2_interfaces is defined %}
-        <button class="tab-button" data-target="l2_interfaces">L2 Interfaces</button>
-    {% endif %}
-
-    {% if hostvars[network_switch]['all_gathered_facts'].l3_interfaces is defined %}
-        <button class="tab-button" data-target="l3_interfaces">L3 Interfaces</button>
-    {% endif %}
-    
-    {% if hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined %}
-        <button class="tab-button" data-target="ospf_interfaces">OSPF Interfaces</button>
-    {% endif %}
-
-    {% if hostvars[network_switch]['all_gathered_facts'].ospfv2 is defined %}
-        <button class="tab-button" data-target="ospfv2">ospfv2</button>
-    {% endif %}
-
-    {% if hostvars[network_switch]['all_gathered_facts'].ospfv3 is defined %}
-        <button class="tab-button" data-target="ospfv3">ospfv3</button>
-    {% endif %}
-
-    {% if hostvars[network_switch]['all_gathered_facts'].bgp_global is defined %}
-        <button class="tab-button" data-target="bgp_global">BGP Global Configuration</button>
-    {% endif %}
-
-    {% if hostvars[network_switch]['all_gathered_facts'].bgp_address_family is defined %}
-        <button class="tab-button" data-target="bgp_address_family">BGP Address Family Configuration</button>
-    {% endif %}
-
-
-
-</div>
-
-<!-- Interfaces Tab -->
-<div id="interfaces" class="tab-content">
-    <h2>Interfaces</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Interface Name</th>
-                <th>Status</th>
-                <th>Speed</th>
-                <th>Duplex</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if hostvars[network_switch]['all_gathered_facts'].interfaces is defined and hostvars[network_switch]['all_gathered_facts'].interfaces|length > 0 %}
-                {% for interface in hostvars[network_switch]['all_gathered_facts'].interfaces %}
-                <tr>
-                    <td>{{ interface.name }}</td>
-                    <td class="{% if interface.enabled is defined and interface.enabled %}enabled{% else %}disabled{% endif %}">
-                        {{ "Enabled" if interface.enabled is defined and interface.enabled else "Disabled" }}
-                    </td>
-                    <td>{{ interface.speed | default('N/A') }}</td>
-                    <td>{{ interface.duplex | default('N/A') }}</td>
-                </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td colspan="4">No interface data available</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
-</div>
-
-<!-- L2 Interfaces Tab -->
-<div id="l2_interfaces" class="tab-content">
-    <h2>L2 Interfaces - Trunk/Access Ports</h2>
-    <table style="border-collapse: collapse; width: 100%;">
-        <thead>
-            <tr>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Name</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Mode</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Access VLAN</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Trunk Native VLAN</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Trunk Allowed VLANs</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% if hostvars[network_switch]['all_gathered_facts'].l2_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].l2_interfaces|length > 0 %}
-        {% for l2_interface in hostvars[network_switch]['all_gathered_facts'].l2_interfaces %}
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{l2_interface.name}}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{l2_interface.mode|default("Not Configured")}}</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">
-                    {% if l2_interface.access is defined and l2_interface.access.vlan is defined %}
-                        {{l2_interface.access.vlan}}
-                    {% else %}
-                        Not Configured
-                    {% endif %}
-                </td>
-                <td style="border: 1px solid #ddd; padding: 8px;">
-                    {% if l2_interface.trunk is defined and l2_interface.trunk.native_vlan is defined %}
-                        {{l2_interface.trunk.native_vlan}}
-                    {% else %}
-                        Not Configured
-                    {% endif %}
-                </td>
-                <td style="border: 1px solid #ddd; padding: 8px;">
-                    {% if l2_interface.trunk is defined and l2_interface.trunk.allowed_vlans is defined %}
-                        {{l2_interface.trunk.allowed_vlans}}
-                    {% else %}
-                        Not Configured
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        {% elif hostvars[network_switch]['all_gathered_facts'].l2_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].l2_interfaces|length == 0 %}
-            <tr><td colspan="5" style="border: 1px solid #ddd; padding: 8px;">L2 information is not configured on this device</td></tr>
-        {% else %}
-            <tr><td colspan="5" style="border: 1px solid #ddd; padding: 8px;">No L2 information available</td></tr>
+    <!-- Tabs -->
+    <div class="tabs">
+        {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].interfaces is defined %}
+            <button class="tab-button active" data-target="interfaces">Interfaces</button>
         {% endif %}
-        </tbody>
-    </table>
-</div>
 
-<!-- L3 Interfaces Tab -->
-<div id="l3_interfaces" class="tab-content">
-    <h2>L3 Interfaces Configuration</h2>
-    <table style="border-collapse: collapse; width: 100%;">
-        <thead>
-            <tr>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Interface Name</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">IPv4 Address</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">IPv6 Address</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% if hostvars[network_switch]['all_gathered_facts'].l3_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].l3_interfaces|length > 0 %}
-            {% for interface in hostvars[network_switch]['all_gathered_facts'].l3_interfaces %}
-                <tr>
-                    <td style="border: 1px solid #ddd; padding: 8px;">{{ interface.name }}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">
-                        {% if interface.ipv4 is defined %}
-                            {% for ip in interface.ipv4 %}
-                                {{ ip.address }}{% if not loop.last %}<br>{% endif %}
-                            {% endfor %}
-                        {% else %}
-                            Not Configured
-                        {% endif %}
-                    </td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">
-                        {% if interface.ipv6 is defined %}
-                            {% for ip in interface.ipv6 %}
-                                {{ ip.address }}{% if not loop.last %}<br>{% endif %}
-                            {% endfor %}
-                        {% else %}
-                            Not Configured
-                        {% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        {% elif hostvars[network_switch]['all_gathered_facts'].l3_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].l3_interfaces|length == 0 %}
-            <tr>
-                <td colspan="3" style="border: 1px solid #ddd; padding: 8px;">L3 information is not configured on this device</td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="3" style="border: 1px solid #ddd; padding: 8px;">No L3 information available</td>
-            </tr>
+        {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].l2_interfaces is defined %}
+            <button class="tab-button" data-target="l2_interfaces">L2 Interfaces</button>
         {% endif %}
-        </tbody>
-    </table>
-</div>
 
-<!-- OSPF Interfaces Tab -->
+        {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].l3_interfaces is defined %}
+            <button class="tab-button" data-target="l3_interfaces">L3 Interfaces</button>
+        {% endif %}
+        
+        {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined %}
+            <button class="tab-button" data-target="ospf_interfaces">OSPF Interfaces</button>
+        {% endif %}
 
-<div id="ospf_interfaces" class="tab-content">
-    <h2>OSPF Interfaces Configuration</h2>
-    <table>
-    <thead>
-        <tr>
-            <th>Interface Name</th>
-            <th>Area ID</th>
-            <th>Address Family</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% if hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length > 0 %}
-        {% for interface in hostvars[network_switch]['all_gathered_facts'].ospf_interfaces %}
-            {% if interface.address_family is defined %}
-                {% for af in interface.address_family %}
+        {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ospfv2 is defined %}
+            <button class="tab-button" data-target="ospfv2">ospfv2</button>
+        {% endif %}
+
+        {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ospfv3 is defined %}
+            <button class="tab-button" data-target="ospfv3">ospfv3</button>
+        {% endif %}
+
+        {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global is defined %}
+            <button class="tab-button" data-target="bgp_global">BGP Global Configuration</button>
+        {% endif %}
+
+        {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].bgp_address_family is defined %}
+            <button class="tab-button" data-target="bgp_address_family">BGP Address Family Configuration</button>
+        {% endif %}
+    </div>
+
+    <!-- Interfaces Tab -->
+    <div id="interfaces" class="tab-content">
+        <h2>Interfaces</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Interface Name</th>
+                    <th>Status</th>
+                    <th>Speed</th>
+                    <th>Duplex</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].interfaces is defined and hostvars[network_switch]['all_gathered_facts'].interfaces|length > 0 %}
+                    {% for interface in hostvars[network_switch]['all_gathered_facts'].interfaces %}
                     <tr>
                         <td>{{ interface.name }}</td>
-                        <td>{{ af.area.area_id|default("Not Configured") }}</td>
-                        <td>{{ af.afi|default("Not Configured") }}</td>
+                        <td class="{% if interface.enabled is defined and interface.enabled %}enabled{% else %}disabled{% endif %}">
+                            {{ "Enabled" if interface.enabled is defined and interface.enabled else "Disabled" }}
+                        </td>
+                        <td>{{ interface.speed | default('N/A') }}</td>
+                        <td>{{ interface.duplex | default('N/A') }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4">No interface data available</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- L2 Interfaces Tab -->
+    <div id="l2_interfaces" class="tab-content">
+        <h2>L2 Interfaces - Trunk/Access Ports</h2>
+        <table style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Name</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Mode</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Access VLAN</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Trunk Native VLAN</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Trunk Allowed VLANs</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].l2_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].l2_interfaces|length > 0 %}
+                {% for l2_interface in hostvars[network_switch]['all_gathered_facts'].l2_interfaces %}
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{l2_interface.name}}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{l2_interface.mode|default("Not Configured")}}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">
+                            {% if l2_interface.access is defined and l2_interface.access.vlan is defined %}
+                                {{l2_interface.access.vlan}}
+                            {% else %}
+                                Not Configured
+                            {% endif %}
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">
+                            {% if l2_interface.trunk is defined and l2_interface.trunk.native_vlan is defined %}
+                                {{l2_interface.trunk.native_vlan}}
+                            {% else %}
+                                Not Configured
+                            {% endif %}
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">
+                            {% if l2_interface.trunk is defined and l2_interface.trunk.allowed_vlans is defined %}
+                                {{l2_interface.trunk.allowed_vlans}}
+                            {% else %}
+                                Not Configured
+                            {% endif %}
+                        </td>
                     </tr>
                 {% endfor %}
+            {% elif hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].l2_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].l2_interfaces|length == 0 %}
+                <tr><td colspan="5" style="border: 1px solid #ddd; padding: 8px;">L2 information is not configured on this device</td></tr>
+            {% else %}
+                <tr><td colspan="5" style="border: 1px solid #ddd; padding: 8px;">No L2 information available</td></tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- L3 Interfaces Tab -->
+    <div id="l3_interfaces" class="tab-content">
+        <h2>L3 Interfaces Configuration</h2>
+        <table style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Interface Name</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">IPv4 Address</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">IPv6 Address</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].l3_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].l3_interfaces|length > 0 %}
+                {% for interface in hostvars[network_switch]['all_gathered_facts'].l3_interfaces %}
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ interface.name }}</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">
+                            {% if interface.ipv4 is defined and interface.ipv4|length > 0 %}
+                                {% for ip in interface.ipv4 %}
+                                    {% if ip.address is defined %}
+                                        {{ ip.address }}{% if not loop.last %}<br>{% endif %}
+                                    {% elif ip.dhcp is defined and ip.dhcp.enable is defined and ip.dhcp.enable %}
+                                        DHCP Enabled
+                                    {% else %}
+                                        Not Configured
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                Not Configured
+                            {% endif %}
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">
+                            {% if interface.ipv6 is defined and interface.ipv6|length > 0 %}
+                                {% for ip in interface.ipv6 %}
+                                    {% if ip.address is defined %}
+                                        {{ ip.address }}{% if not loop.last %}<br>{% endif %}
+                                    {% else %}
+                                        Not Configured
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                Not Configured
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% elif hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].l3_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].l3_interfaces|length == 0 %}
+                <tr>
+                    <td colspan="3" style="border: 1px solid #ddd; padding: 8px;">L3 information is not configured on this device</td>
+                </tr>
             {% else %}
                 <tr>
-                    <td>{{ interface.name }}</td>
-                    <td colspan="2">No OSPF configuration</td>
+                    <td colspan="3" style="border: 1px solid #ddd; padding: 8px;">No L3 information available</td>
                 </tr>
             {% endif %}
-        {% endfor %}
-    {% elif hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length == 0 %}
-        <tr><td colspan="3">No OSPF interfaces are configured on this device</td></tr>
-    {% else %}
-        <tr><td colspan="3">No OSPF interface information available</td></tr>
-    {% endif %}
-    </tbody>
-</table>
+            </tbody>
+        </table>
+    </div>
 
-</div>
+    <!-- OSPF Interfaces Tab -->
+    <div id="ospf_interfaces" class="tab-content">
+        <h2>OSPF Interfaces Configuration</h2>
 
-<!-- OSPFv2 Tab -->
-<div id="ospfv2" class="tab-content">
-    <h2>OSPFv2 Configuration</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Process ID</th>
-                <th>Router ID</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% if hostvars[network_switch]['all_gathered_facts'].ospfv2 is defined and hostvars[network_switch]['all_gathered_facts'].ospfv2.processes is defined %}
-            {% for ospf_process in hostvars[network_switch]['all_gathered_facts'].ospfv2.processes %}
-            <tr>
-                <td>{{ ospf_process.process_id }}</td>
-                <td>{{ ospf_process.router_id|default("Not Configured") }}</td>
-            </tr>
-            {% endfor %}
-        {% elif hostvars[network_switch]['all_gathered_facts'].ospfv2 is defined and (hostvars[network_switch]['all_gathered_facts'].ospfv2.processes is not defined or hostvars[network_switch]['all_gathered_facts'].ospfv2.processes|length == 0) %}
-            <tr><td colspan="2">OSPF is not configured on this device</td></tr>
-        {% else %}
-            <tr><td colspan="2">No OSPF information available</td></tr>
-        {% endif %}
-        </tbody>
-    </table>
-</div>
-
-
-<!-- OSPFv3 Global Tab -->
-<div id="ospfv3" class="tab-content">
-    <h2>OSPFv3 Global Configuration</h2>
-    <table style="border-collapse: collapse; width: 100%;">
-        <thead>
-            <tr>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Parameter</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Value</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if hostvars[network_switch]['all_gathered_facts'].ospfv3 is defined and hostvars[network_switch]['all_gathered_facts'].ospfv3.processes is defined %}
-            {% for process in hostvars[network_switch]['all_gathered_facts'].ospfv3.processes %}
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">Process ID</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ process.process_id }}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">Router ID</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">{{ process.router_id }}</td>
-            </tr>
-            <tr>
-                <td style="border: 1px solid #ddd; padding: 8px;">Address Family</td>
-                <td style="border: 1px solid #ddd; padding: 8px;">
-                    {% if process.address_family is defined %}
-                    {{ process.address_family.afi }} {{ process.address_family.safi }}
+        {# Cisco IOS Devices #}
+        {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ansible_network_os is defined and hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'cisco.ios.ios' and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Interface Name</th>
+                        <th>Area ID</th>
+                        <th>Address Family</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length > 0 %}
+                        {% for interface in hostvars[network_switch]['all_gathered_facts'].ospf_interfaces %}
+                            {% if interface.address_family is defined and interface.address_family|length > 0 %}
+                                {% for af in interface.address_family %}
+                                    <tr>
+                                        <td>{{ interface.name }}</td>
+                                        <td>
+                                            {% if af.processes is defined and af.processes|length > 0 and af.processes[0].area is defined and af.processes[0].area.area_id is defined %}
+                                                {{ af.processes[0].area.area_id }}
+                                            {% else %}
+                                                Not Configured
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ af.afi|default("Not Configured") }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td>{{ interface.name }}</td>
+                                    <td colspan="2">No OSPF configuration</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
                     {% else %}
-                    Not configured
+                        <tr><td colspan="3">No OSPF interfaces are configured on this device</td></tr>
                     {% endif %}
-                </td>
-            </tr>
-            {% endfor %}
+                </tbody>
+            </table>
+
+        {# Cisco NX-OS Devices #}
+        {% elif hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ansible_network_os is defined and hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'cisco.nxos.nxos' and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Interface Name</th>
+                        <th>Area ID</th>
+                        <th>Address Family</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length > 0 %}
+                        {% for interface in hostvars[network_switch]['all_gathered_facts'].ospf_interfaces %}
+                            {% if interface.address_family is defined and interface.address_family|length > 0 %}
+                                {% for af in interface.address_family %}
+                                    {% if af.processes is defined and af.processes|length > 0 %}
+                                        {% for process in af.processes %}
+                                            <tr>
+                                                <td>{{ interface.name }}</td>
+                                                <td>
+                                                    {% if process.area is defined and process.area.area_id is defined %}
+                                                        {{ process.area.area_id }}
+                                                    {% else %}
+                                                        Not Configured
+                                                    {% endif %}
+                                                </td>
+                                                <td>{{ af.afi | default("Not Configured") }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td>{{ interface.name }}</td>
+                                            <td colspan="2">No OSPF process configuration</td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td>{{ interface.name }}</td>
+                                    <td colspan="2">No OSPF configuration</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="3">No OSPF interfaces are configured on this device</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+        {# Arista EOS Devices #}
+        {% elif hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ansible_network_os is defined and hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'arista.eos.eos' and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Interface Name</th>
+                        <th>Area ID</th>
+                        <th>Address Family</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length > 0 %}
+                        {% for interface in hostvars[network_switch]['all_gathered_facts'].ospf_interfaces %}
+                            {% if interface.address_family is defined and interface.address_family|length > 0 %}
+                                {% for af in interface.address_family %}
+                                    <tr>
+                                        <td>{{ interface.name }}</td>
+                                        <td>
+                                            {% if af.area is defined and af.area.area_id is defined %}
+                                                {{ af.area.area_id }}
+                                            {% else %}
+                                                Not Configured
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ af.afi|default("Not Configured") }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td>{{ interface.name }}</td>
+                                    <td colspan="2">No OSPF configuration</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="3">No OSPF interfaces are configured on this device</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+        {# Cisco IOS XR Devices #}
+        {% elif hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ansible_network_os is defined and hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'cisco.iosxr.iosxr' and hostvars[network_switch]['all_gathered_facts'].ospf_interfaces is defined %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Interface Name</th>
+                        <th>Area ID</th>
+                        <th>Address Family</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if hostvars[network_switch]['all_gathered_facts'].ospf_interfaces|length > 0 %}
+                        {% for interface in hostvars[network_switch]['all_gathered_facts'].ospf_interfaces %}
+                            {% if interface.address_family is defined and interface.address_family|length > 0 %}
+                                {% for af in interface.address_family %}
+                                    <tr>
+                                        <td>{{ interface.name }}</td>
+                                        <td>
+                                            {% if af.processes is defined and af.processes|length > 0 %}
+                                                {% for process in af.processes %}
+                                                    {% if process.area is defined and process.area.area_id is defined %}
+                                                        {{ process.area.area_id }}
+                                                    {% else %}
+                                                        Not Configured
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                Not Configured
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ af.afi|default("Not Configured") }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td>{{ interface.name }}</td>
+                                    <td colspan="2">No OSPF configuration</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="3">No OSPF interfaces are configured on this device</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+        {% else %}
+            <p>No OSPF interface information available for this device.</p>
+        {% endif %}
+    </div>
+
+    <!-- OSPFv2 Tab -->
+    <div id="ospfv2" class="tab-content">
+        <h2>OSPFv2 Configuration</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Process ID</th>
+                    <th>Router ID</th>
+                    <th>Networks</th>
+                </tr>
+            </thead>
+            <tbody>
+            {# Cisco IOS & NX-OS Devices #}
+            {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ospfv2 is defined and hostvars[network_switch]['all_gathered_facts'].ospfv2.processes is defined and hostvars[network_switch]['all_gathered_facts'].ospfv2.processes|length > 0 %}
+                {% for ospf_process in hostvars[network_switch]['all_gathered_facts'].ospfv2.processes %}
+                <tr>
+                    <td>{{ ospf_process.process_id }}</td>
+                    <td>{{ ospf_process.router_id|default("Not Configured") }}</td>
+                    <td>
+                        {% if ospf_process.networks is defined and ospf_process.networks|length > 0 %}
+                        <ul>
+                            {% for network in ospf_process.networks %}
+                            <li>{{ network.prefix }} (Area {{ network.area }})</li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        No networks configured
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% elif hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ospfv2 is defined and (hostvars[network_switch]['all_gathered_facts'].ospfv2.processes is not defined or hostvars[network_switch]['all_gathered_facts'].ospfv2.processes|length == 0) %}
+                <tr><td colspan="3">OSPF is not configured on this device</td></tr>
             {% else %}
-            <tr>
-                <td colspan="2" style="border: 1px solid #ddd; padding: 8px;">No OSPFv3 global configuration available</td>
-            </tr>
+                <tr><td colspan="3">No OSPF information available</td></tr>
             {% endif %}
-        </tbody>
-    </table>
-</div>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- OSPFv3 Global Tab -->
+    <div id="ospfv3" class="tab-content">
+        <h2>OSPFv3 Global Configuration</h2>
+        <table style="border-collapse: collapse; width: 100%;">
+            <thead>
+                <tr>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Parameter</th>
+                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if hostvars[network_switch].all_gathered_facts is defined and hostvars[network_switch]['all_gathered_facts'].ospfv3 is defined and hostvars[network_switch]['all_gathered_facts'].ospfv3.processes is defined and hostvars[network_switch]['all_gathered_facts'].ospfv3.processes|length > 0 %}
+                    {% for process in hostvars[network_switch]['all_gathered_facts'].ospfv3.processes %}
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">Process ID</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ process.process_id }}</td>
+                    </tr>
+                    {% if process.router_id is defined %}
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">Router ID</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">{{ process.router_id }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 8px;">Address Family</td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">
+                            {% if process.address_family is defined and process.address_family.afi is defined and process.address_family.safi is defined %}
+                                {{ process.address_family.afi }} {{ process.address_family.safi }}
+                            {% else %}
+                                Not configured
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="2" style="border: 1px solid #ddd; padding: 8px;">No OSPFv3 global configuration available</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 
 <!-- BGP Global Tab -->
 <div id="bgp_global" class="tab-content">
@@ -378,7 +542,7 @@
             </tr>
         </thead>
         <tbody>
-            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global is defined %}
+            {% if hostvars[network_switch]['all_gathered_facts'] is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global is defined %}
             <tr>
                 <td style="border: 1px solid #ddd; padding: 8px;">AS Number</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.as_number }}</td>
@@ -389,22 +553,41 @@
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.router_id }}</td>
             </tr>
             {% endif %}
-            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.router_id is defined %}
+            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.router_id is defined %}
             <tr>
                 <td style="border: 1px solid #ddd; padding: 8px;">Router ID</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.router_id }}</td>
             </tr>
             {% endif %}
 
+            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp is defined %}
+            <tr>
+                <td style="border: 1px solid #ddd; padding: 8px;">BGP Settings</td>
+                <td style="border: 1px solid #ddd; padding: 8px;">
+                    {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.log_neighbor_changes is defined %}
+                    Log Neighbor Changes: {{ hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.log_neighbor_changes }}
+                    {% endif %}
+                    
+                    {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.default is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.default.ipv4_unicast is defined %}
+                    <br>IPv4 Unicast: {{ hostvars[network_switch]['all_gathered_facts'].bgp_global.bgp.default.ipv4_unicast }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endif %}
+
             {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.timers is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.bgp is defined %}
+            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.bgp.keepalive is defined %}
             <tr>
                 <td style="border: 1px solid #ddd; padding: 8px;">Keepalive Timer</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.bgp.keepalive }} seconds</td>
             </tr>
+            {% endif %}
+            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.bgp.holdtime is defined %}
             <tr>
                 <td style="border: 1px solid #ddd; padding: 8px;">Holdtime</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.bgp.holdtime }} seconds</td>
             </tr>
+            {% endif %}
             {% endif %}
 
             {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.timers is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.keepalive_time is defined %}
@@ -412,13 +595,13 @@
                 <td style="border: 1px solid #ddd; padding: 8px;">Keepalive Timer</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.keepalive_time }} seconds</td>
             </tr>
+            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.holdtime is defined %}
             <tr>
                 <td style="border: 1px solid #ddd; padding: 8px;">Holdtime</td>
                 <td style="border: 1px solid #ddd; padding: 8px;">{{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.holdtime }} seconds</td>
             </tr>
-
             {% endif %}
-
+            {% endif %}
 
             {% else %}
             <tr>
@@ -433,6 +616,9 @@
 <!-- BGP Address Family Tab -->
 <div id="bgp_address_family" class="tab-content">
     <h2>BGP Address Family Configuration</h2>
+
+    {% if hostvars[network_switch]['all_gathered_facts'] is defined and hostvars[network_switch]['all_gathered_facts'].ansible_network_os is defined %}
+    
     {% if hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'arista.eos.eos' %}
     <!-- Table for EOS Devices -->
     <table style="border-collapse: collapse; width: 100%;">
@@ -446,23 +632,31 @@
             </tr>
         </thead>
         <tbody>
-            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global is defined %}
+            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global.neighbor is defined %}
                 {% for neighbor in hostvars[network_switch]['all_gathered_facts'].bgp_global.neighbor %}
                     <tr>
                         <td style="border: 1px solid #ddd; padding: 8px;">
                             {{ neighbor.neighbor_address }}
                         </td>
                         <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.remote_as }}
+                            {% if neighbor.remote_as is defined %}
+                                {{ neighbor.remote_as }}
+                            {% else %}
+                                Not configured
+                            {% endif %}
                         </td>
                         <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.maximum_received_routes.count }}
+                            {% if neighbor.maximum_received_routes is defined and neighbor.maximum_received_routes.count is defined %}
+                                {{ neighbor.maximum_received_routes.count }}
+                            {% else %}
+                                Not configured
+                            {% endif %}
                         </td>
                         <td style="border: 1px solid #ddd; padding: 8px;">
                             {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.network is defined %}
                                 <ul style="padding-left: 20px;">
                                     {% for network in hostvars[network_switch]['all_gathered_facts'].bgp_global.network %}
-                                        {% if network.address is match("^\d+\.\d+\.\d+\.\d+") %}
+                                        {% if network.address is defined and network.address is match("^\d+\.\d+\.\d+\.\d+") %}
                                             <li>{{ network.address }}</li>
                                         {% endif %}
                                     {% endfor %}
@@ -472,20 +666,27 @@
                             {% endif %}
                         </td>
                         <td style="border: 1px solid #ddd; padding: 8px;">
-                            Keepalive: {{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.keepalive }} / Holdtime: {{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.holdtime }}    
-
+                            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.timers is defined %}
+                                {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.keepalive is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.holdtime is defined %}
+                                    Keepalive: {{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.keepalive }} / Holdtime: {{ hostvars[network_switch]['all_gathered_facts'].bgp_global.timers.holdtime }}    
+                                {% else %}
+                                    Not configured
+                                {% endif %}
+                            {% else %}
+                                Not configured
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="5" style="border: 1px solid #ddd; padding: 8px;">No BGP global configuration available</td>
+                    <td colspan="5" style="border: 1px solid #ddd; padding: 8px;">No BGP neighbors configured</td>
                 </tr>
             {% endif %}
         </tbody>
     </table>
 
-{% elif hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'cisco.ios.ios' %}
+    {% elif hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'cisco.ios.ios' %}
     <!-- Table for IOS Devices -->
     <table style="border-collapse: collapse; width: 100%;">
         <thead>
@@ -497,23 +698,31 @@
             </tr>
         </thead>
         <tbody>
-            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global is defined %}
+            {% if hostvars[network_switch]['all_gathered_facts'].bgp_global is defined and hostvars[network_switch]['all_gathered_facts'].bgp_global.neighbor is defined %}
                 {% for neighbor in hostvars[network_switch]['all_gathered_facts'].bgp_global.neighbor %}
                     <tr>
                         <td style="border: 1px solid #ddd; padding: 8px;">
                             {{ neighbor.neighbor_address }}
                         </td>
                         <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.remote_as }}
+                            {% if neighbor.remote_as is defined %}
+                                {{ neighbor.remote_as }}
+                            {% else %}
+                                Not configured
+                            {% endif %}
                         </td>
                         <td style="border: 1px solid #ddd; padding: 8px;">
-                            {{ neighbor.maximum_received_routes.count }}
+                            {% if neighbor.maximum_received_routes is defined and neighbor.maximum_received_routes.count is defined %}
+                                {{ neighbor.maximum_received_routes.count }}
+                            {% else %}
+                                Not configured
+                            {% endif %}
                         </td>
                         <td style="border: 1px solid #ddd; padding: 8px;">
                             {% if hostvars[network_switch]['all_gathered_facts'].bgp_global.network is defined %}
                                 <ul style="padding-left: 20px;">
                                     {% for network in hostvars[network_switch]['all_gathered_facts'].bgp_global.network %}
-                                        {% if network.address is match("^\d+\.\d+\.\d+\.\d+") %}
+                                        {% if network.address is defined and network.address is match("^\d+\.\d+\.\d+\.\d+") %}
                                             <li>{{ network.address }}</li>
                                         {% endif %}
                                     {% endfor %}
@@ -526,17 +735,76 @@
                 {% endfor %}
             {% else %}
                 <tr>
-                    <td colspan="4" style="border: 1px solid #ddd; padding: 8px;">No BGP global configuration available</td>
+                    <td colspan="4" style="border: 1px solid #ddd; padding: 8px;">No BGP neighbors configured</td>
                 </tr>
             {% endif %}
         </tbody>
     </table>
 
-
-{% endif %}
-
-
+    {% elif hostvars[network_switch]['all_gathered_facts'].ansible_network_os == 'cisco.nxos.nxos' %}
+    <!-- Table for NXOS Devices -->
+    <table style="border-collapse: collapse; width: 100%;">
+        <thead>
+            <tr>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Address Family</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">AS Number</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Networks</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if hostvars[network_switch]['all_gathered_facts'].bgp_address_family is defined %}
+                {% if hostvars[network_switch]['all_gathered_facts'].bgp_address_family.address_family is defined %}
+                    {% for af in hostvars[network_switch]['all_gathered_facts'].bgp_address_family.address_family %}
+                        <tr>
+                            <td style="border: 1px solid #ddd; padding: 8px;">
+                                {% if af.afi is defined %}{{ af.afi }}{% else %}Unknown{% endif %}
+                                {% if af.safi is defined %} / {{ af.safi }}{% endif %}
+                            </td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">
+                                {% if hostvars[network_switch]['all_gathered_facts'].bgp_address_family.as_number is defined %}
+                                    {{ hostvars[network_switch]['all_gathered_facts'].bgp_address_family.as_number }}
+                                {% else %}
+                                    Not configured
+                                {% endif %}
+                            </td>
+                            <td style="border: 1px solid #ddd; padding: 8px;">
+                                {% if af.networks is defined %}
+                                    <ul style="padding-left: 20px;">
+                                        {% for network in af.networks %}
+                                            {% if network.prefix is defined %}
+                                                <li>{{ network.prefix }}</li>
+                                            {% else %}
+                                                Not configured
+                                            {% endif %}
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    No networks configured
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" style="border: 1px solid #ddd; padding: 8px;">No address families configured</td>
+                    </tr>
+                {% endif %}
+            {% else %}
+                <tr>
+                    <td colspan="3" style="border: 1px solid #ddd; padding: 8px;">No BGP Address Family configuration available</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Unknown network OS: {{ hostvars[network_switch]['all_gathered_facts'].ansible_network_os }}</p>
+    {% endif %}
+    {% else %}
+    <p>No network OS information available</p>
+    {% endif %}
 </div>
+
+
 
 
 {% endfor %}

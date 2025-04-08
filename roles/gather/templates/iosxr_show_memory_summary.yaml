@@ -5,10 +5,10 @@
       total_mb: "{{ physical_total }}"
 
 - name: "memory_summary_app_total"
-  getval: "\\sApplication Memory :\\s+(?P<app_total>\\d+M)"
+  getval: "\\sApplication\\sMemory\\s:\\s\\d+M\\s\\((?P<free>\\d+M)\\savailable\\)"
   result:
     memory:
-      free_mb: "{{ app_total }}"
+      free_mb: "{{ free }}"
 
 - name: "memory_summary_image_size"
   getval: "\\sImage:\\s+(?P<image_size>\\d+M)"

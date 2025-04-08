@@ -4,9 +4,6 @@
     parser:
       name: ansible.netcommon.native
     set_fact: version_data
-# - name: Combine data into system_resources
-#   ansible.builtin.set_fact:
-#     system_resources: "{{ version_data | combine(resources_data, recursive=True) }}"
 
 - name: Parse hostname
   ansible.utils.cli_parse:
@@ -15,6 +12,19 @@
       name: ansible.netcommon.native
     set_fact: hostname_resources
 
-- name: Combine data into system_resources
+- name: Parse license
+  ansible.utils.cli_parse:
+    command: "show license all"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: license_data
+
+# Combine all into one system_resources
+- name: Combine all resources into system_resources
   ansible.builtin.set_fact:
-    system_resources: "{{ version_data | combine( hostname_resources, recursive=True) }}"
+    system_resources: >-
+      {{
+        version_data
+        | combine(hostname_resources, recursive=True)
+        | combine(license_data, recursive=True)
+      }}

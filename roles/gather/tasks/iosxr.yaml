@@ -5,7 +5,7 @@
       name: ansible.netcommon.native
     set_fact: version_data
 
-- name: Parse memory memory_summary
+- name: Parse show memory summary
   ansible.utils.cli_parse:
     command: "show memory summary"
     parser:
@@ -19,6 +19,13 @@
       name: ansible.netcommon.native
     set_fact: hostname_resources
 
-- name: Combine data into system_resources
+- name: Parse license data
+  ansible.utils.cli_parse:
+    command: "sh license all"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: licence_data
+
+- name: Combine all data into system_resources
   ansible.builtin.set_fact:
-    system_resources: "{{ version_data | combine(memory_resources, hostname_resources, recursive=True) }}"
+    system_resources: "{{ version_data | combine(memory_resources, recursive=True) | combine(hostname_resources, recursive=True) | combine(licence_data, recursive=True) }}"
