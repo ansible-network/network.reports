@@ -19,9 +19,9 @@ The `generate_report` role allows users to generate HTML reports based on collec
 
 ## Usage
 
-Below are examples demonstrating how to use the `remediate` role:
+Below are examples demonstrating how to use the `generate_web` role:
 
-### Example 1: Remediate Drift from Local Data Store
+### Example 1: Generate Network Web Report
 
 - Gathering Structured Facts for Network Resources:
 
