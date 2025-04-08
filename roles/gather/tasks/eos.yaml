@@ -4,9 +4,7 @@
     parser:
       name: ansible.netcommon.native
     set_fact: version_resources
-# - name: Combine data into system_resources
-#   ansible.builtin.set_fact:
-#     system_resources: "{{ version_data | combine(resources_data, recursive=True) }}"
+    
 - name: Parse hostname
   ansible.utils.cli_parse:
     command: "show hostname"
