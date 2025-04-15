@@ -1,0 +1,79 @@
+---
+# Cisco NXOS verification template
+
+- name: Set Cisco NXOS verification facts
+  ansible.builtin.set_fact:
+    nxos_verification:
+      # Basic system information
+      system:
+        hostname: "{{ all_gathered_facts.device_name }}"
+        version: "{{ all_gathered_facts.version }}"
+        model: "{{ all_gathered_facts.hardware.model }}"
+        serial: "{{ all_gathered_facts.hardware.serial_number }}"
+        os_type: "{{ all_gathered_facts.os_type }}"
+        release_type: "{{ all_gathered_facts.release_type }}"
+        image_file: "{{ all_gathered_facts.nxos_image_file }}"
+        uptime:
+          days: "{{ all_gathered_facts.uptime.days }}"
+          hours: "{{ all_gathered_facts.uptime.hours }}"
+          minutes: "{{ all_gathered_facts.uptime.minutes }}"
+
+      # Interface information
+      interfaces:
+        count: "{{ all_gathered_facts.interfaces | length | int }}"
+        # Filter only interfaces that have enabled attribute set to true
+        enabled: "{{ all_gathered_facts.interfaces | selectattr('enabled', 'defined') | selectattr('enabled', 'eq', true) | list | length | int }}"
+        l3_interfaces: "{{ all_gathered_facts.l3_interfaces | length | int }}"
+        l2_interfaces: "{{ all_gathered_facts.l2_interfaces | length | int }}"
+        ospf_interfaces: "{{ all_gathered_facts.ospf_interfaces | length | int }}"
+
+      # Routing protocols
+      routing:
+        bgp:
+          configured: "{{ all_gathered_facts.bgp_global is defined }}"
+          as_number: "{{ all_gathered_facts.bgp_global.as_number | default('not configured') }}"
+          neighbors: "{{ all_gathered_facts.bgp_global.neighbors | default([]) | length | int }}"
+          address_families: "{{ all_gathered_facts.bgp_address_family.address_family | default([]) | length | int }}"
+        ospfv2:
+          configured: "{{ all_gathered_facts.ospfv2 is defined and all_gathered_facts.ospfv2.processes is defined }}"
+          process_count: "{{ all_gathered_facts.ospfv2.processes | default([]) | length | int }}"
+        ospfv3:
+          configured: "{{ all_gathered_facts.ospfv3 is defined and all_gathered_facts.ospfv3.processes is defined }}"
+          process_count: "{{ all_gathered_facts.ospfv3.processes | default([]) | length | int }}"
+
+      # System resources
+      resources:
+        memory_total: "{{ all_gathered_facts.memory.total_mb | default('unknown') }} MB"
+        memory_free: "{{ all_gathered_facts.memory.free_mb | default('unknown') }} MB"
+        memory_used: "{{ all_gathered_facts.memory.used_mb | default('unknown') }} MB"
+        bootflash: "{{ all_gathered_facts.bootflash | default('unknown') }} KB"
+        processor_type: "{{ all_gathered_facts.processor.type | default('unknown') }}"
+        processor_memory: "{{ all_gathered_facts.processor.memory | default('unknown') }} KB"
+
+      # Licensing
+      licensing:
+        status: "{{ all_gathered_facts.license.status | default('unknown') }}"
+        name: "{{ all_gathered_facts.license.name | default('unknown') }}"
+        type: "{{ all_gathered_facts.license.license_type | default('unknown') }}"
+        description: "{{ all_gathered_facts.license.description | default('unknown') }}"
+  when: all_gathered_facts.ansible_network_os is defined and 'cisco.nxos.nxos' in all_gathered_facts.ansible_network_os
+
+# Add NXOS specific assertions
+- name: Verify Cisco NXOS specific data
+  ansible.builtin.assert:
+    that:
+      - nxos_verification.system.hostname is defined
+      - nxos_verification.system.version is defined
+      - nxos_verification.system.model is defined
+      - nxos_verification.interfaces.count | int > 0
+      - nxos_verification.routing is defined
+    fail_msg: "Cisco NXOS specific data validation failed"
+    success_msg: "Cisco NXOS specific data validated successfully"
+  when: nxos_verification is defined
+
+- name: Display Cisco NXOS verification results
+  ansible.builtin.debug:
+    var: nxos_verification
+  when:
+    - nxos_verification is defined
+    - not verification_silent | default(false)

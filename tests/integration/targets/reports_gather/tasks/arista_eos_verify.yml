@@ -1,0 +1,65 @@
+---
+# Arista EOS verification template
+
+- name: Set Arista EOS verification facts
+  ansible.builtin.set_fact:
+    eos_verification:
+      # Basic system information
+      system:
+        hostname: "{{ all_gathered_facts.device_name }}"
+        version: "{{ all_gathered_facts.version }}"
+        architecture: "{{ all_gathered_facts.system.architecture }}"
+        mac_address: "{{ all_gathered_facts.system.mac_address }}"
+        uptime:
+          weeks: "{{ all_gathered_facts.uptime.weeks | int }}"
+          days: "{{ all_gathered_facts.uptime.days | int }}"
+          hours: "{{ all_gathered_facts.uptime.hours | int }}"
+          minutes: "{{ all_gathered_facts.uptime.minutes | int }}"
+
+      # Interface information
+      interfaces:
+        count: "{{ all_gathered_facts.interfaces | length | int }}"
+        enabled: "{{ all_gathered_facts.interfaces | selectattr('enabled', 'defined') | selectattr('enabled', 'eq', true) | list | length | int }}"
+        l3_interfaces: "{{ all_gathered_facts.l3_interfaces | length | int }}"
+        l2_interfaces: "{{ all_gathered_facts.l2_interfaces | length | int }}"
+        ospf_interfaces: "{{ all_gathered_facts.ospf_interfaces | length | int }}"
+
+      # Routing protocols
+      routing:
+        bgp:
+          configured: "{{ all_gathered_facts.bgp_global is defined }}"
+          as_number: "{{ all_gathered_facts.bgp_global.as_number | default('not configured') }}"
+          neighbors: "{{ all_gathered_facts.bgp_global.neighbor | default([]) | length | int }}"
+          networks: "{{ all_gathered_facts.bgp_global.network | default([]) | length | int }}"
+        ospfv2:
+          configured: "{{ all_gathered_facts.ospfv2 is defined and all_gathered_facts.ospfv2.processes is defined }}"
+          process_count: "{{ all_gathered_facts.ospfv2.processes | default([]) | length | int }}"
+          router_id: "{{ all_gathered_facts.ospfv2.processes[0].router_id | default('not configured') if all_gathered_facts.ospfv2.processes is defined and all_gathered_facts.ospfv2.processes | length > 0 else 'not configured' }}"
+        ospfv3:
+          configured: "{{ all_gathered_facts.ospfv3 is defined and all_gathered_facts.ospfv3 | length > 0 }}"
+
+      # System resources
+      resources:
+        memory_total: "{{ all_gathered_facts.memory.total_mb | default('unknown') }} MB"
+        memory_free: "{{ all_gathered_facts.memory.free_mb | default('unknown') }} MB"
+        memory_used: "{{ (all_gathered_facts.memory.total_mb - all_gathered_facts.memory.free_mb) | default('unknown') }} MB"
+  when: all_gathered_facts.ansible_network_os is defined and 'arista.eos.eos' in all_gathered_facts.ansible_network_os
+
+# Add EOS specific assertions
+- name: Verify Arista EOS specific data
+  ansible.builtin.assert:
+    that:
+      - eos_verification.system.hostname is defined
+      - eos_verification.system.version is defined
+      - eos_verification.interfaces.count | int > 0
+      - eos_verification.routing is defined
+    fail_msg: "Arista EOS specific data validation failed"
+    success_msg: "Arista EOS specific data validated successfully"
+  when: eos_verification is defined
+
+- name: Display Arista EOS verification results
+  ansible.builtin.debug:
+    var: eos_verification
+  when:
+    - eos_verification is defined
+    - not verification_silent | default(false)

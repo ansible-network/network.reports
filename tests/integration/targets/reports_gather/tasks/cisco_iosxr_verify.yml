@@ -1,0 +1,71 @@
+---
+# Cisco IOS XR verification template
+
+- name: Set Cisco IOS XR verification facts
+  ansible.builtin.set_fact:
+    iosxr_verification:
+      # Basic system information
+      system:
+        hostname: "{{ all_gathered_facts.device_name }}"
+        version: "{{ all_gathered_facts.version }}"
+        model: "{{ all_gathered_facts.hardware.model }}"
+        os_type: "{{ all_gathered_facts.os_type }}"
+        build_info:
+          built_by: "{{ all_gathered_facts.build_info.built_by }}"
+          built_on: "{{ all_gathered_facts.build_info.built_on }}"
+          label: "{{ all_gathered_facts.build_info.label }}"
+
+      # Interface information
+      interfaces:
+        count: "{{ all_gathered_facts.interfaces | length | int }}"
+        enabled: "{{ all_gathered_facts.interfaces | selectattr('enabled', 'defined') | selectattr('enabled', 'eq', true) | list | length | int }}"
+        l3_interfaces: "{{ all_gathered_facts.l3_interfaces | length | int }}"
+        l2_interfaces: "{{ all_gathered_facts.l2_interfaces | length | int }}"
+        ospf_interfaces: "{{ all_gathered_facts.ospf_interfaces | length | int }}"
+
+      # Routing protocols
+      routing:
+        bgp:
+          configured: "{{ all_gathered_facts.bgp_global is defined }}"
+          as_number: "{{ all_gathered_facts.bgp_global.as_number | default('not configured') }}"
+          router_id: "{{ all_gathered_facts.bgp_global.bgp.router_id | default('not configured') }}"
+          neighbors: "{{ all_gathered_facts.bgp_global.neighbors | default([]) | length | int }}"
+          address_families: "{{ all_gathered_facts.bgp_address_family.address_family | default([]) | length | int }}"
+        ospfv2:
+          configured: "{{ all_gathered_facts.ospfv2 is defined and all_gathered_facts.ospfv2.processes is defined }}"
+          process_count: "{{ all_gathered_facts.ospfv2.processes | default([]) | length | int }}"
+        ospfv3:
+          configured: "{{ all_gathered_facts.ospfv3 is defined and all_gathered_facts.ospfv3.processes is defined }}"
+          process_count: "{{ all_gathered_facts.ospfv3.processes | default([]) | length | int }}"
+          router_id: "{{ all_gathered_facts.ospfv3.processes[0].router_id | default('not configured') if all_gathered_facts.ospfv3.processes is defined and all_gathered_facts.ospfv3.processes | length > 0 else 'not configured' }}"
+
+      # System resources
+      resources:
+        memory_total: "{{ all_gathered_facts.memory.total_mb | default('unknown') }}"
+        memory_free: "{{ all_gathered_facts.memory.free_mb | default('unknown') }}"
+
+      # Licensing
+      licensing:
+        status: "{{ all_gathered_facts.license.status | default('unknown') }}"
+        name: "{{ all_gathered_facts.license.name | default('unknown') }}"
+  when: all_gathered_facts.ansible_network_os is defined and 'cisco.iosxr.iosxr' in all_gathered_facts.ansible_network_os
+
+# Add IOS XR specific assertions
+- name: Verify Cisco IOS XR specific data
+  ansible.builtin.assert:
+    that:
+      - iosxr_verification.system.hostname is defined
+      - iosxr_verification.system.version is defined
+      - iosxr_verification.system.model is defined
+      - iosxr_verification.interfaces.count | int > 0
+      - iosxr_verification.routing is defined
+    fail_msg: "Cisco IOS XR specific data validation failed"
+    success_msg: "Cisco IOS XR specific data validated successfully"
+  when: iosxr_verification is defined
+
+- name: Display Cisco IOS XR verification results
+  ansible.builtin.debug:
+    var: iosxr_verification
+  when:
+    - iosxr_verification is defined
+    - not verification_silent | default(false)

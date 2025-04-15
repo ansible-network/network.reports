@@ -1,0 +1,68 @@
+---
+- name: Debug
+  ansible.builtin.debug:
+    msg: "START network.reports persist operation integration tests on connection={{ ansible_connection }}"
+
+- name: Cleanup, gather and persist
+  block:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _cleanup.yml
+
+    - name: Set data_store
+      ansible.builtin.set_fact:
+        test_data_store:
+          local: "~/test_backup"
+
+    - name: Perform gather operation for network resources
+      block:
+        - name: Run network.reports.gather role to collect interface information
+          ansible.builtin.include_role:
+            name: network.reports.gather
+          vars:
+            resources:
+              - "interfaces"
+              - "l2_interfaces"
+              - "l3_interfaces"
+              - "ospf_interfaces"
+              - "ospfv2"
+              - "ospfv3"
+              - "bgp_global"
+              - "bgp_address_family"
+
+    - name: Run network.reports validated content with persist operation
+      ansible.builtin.include_role:
+        name: network.reports.persist
+      vars:
+        data_store: "{{ test_data_store }}"
+
+    - name: Run network.reports validated content with persist operation again
+      ansible.builtin.include_role:
+        name: network.reports.persist
+      vars:
+        data_store: "{{ test_data_store }}"
+      register: reports_result
+
+    - name: Assert that result is idempotent
+      ansible.builtin.assert:
+        that:
+          - reports_result.changed == false
+
+    - name: Run network.reports validated content with deploy operation
+      ansible.builtin.include_role:
+        name: network.reports.deploy
+      vars:
+        data_store: "{{ test_data_store }}"
+      register: deploy_result
+
+    - name: Assert that deploy result is idempotent
+      ansible.builtin.assert:
+        that:
+          - deploy_result.changed == false
+
+  always:
+    - name: Reset configuration
+      ansible.builtin.include_tasks: _cleanup.yml
+
+- name: Debug
+  ansible.builtin.debug:
+    msg: "END network.reports persist operation integration tests on connection={{ ansible_connection }}"

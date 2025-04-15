@@ -11,20 +11,37 @@
       vars:
         resources:
           - "interfaces"
+          - "l2_interfaces"
+          - "l3_interfaces"
+          - "ospf_interfaces"
+          - "ospfv2"
+          - "ospfv3"
+          - "bgp_global"
+          - "bgp_address_family"
       register: gather_result
 
-    - name: Verify gathered facts contains interfaces data
-      ansible.builtin.assert:
-        that:
-          - all_gathered_facts is defined
-          - all_gathered_facts.interfaces is defined
-          - all_gathered_facts.interfaces | type_debug == "list"
-        fail_msg: "Interfaces data was not properly gathered"
-        success_msg: "Interfaces data was successfully gathered"
+    - name: Determine network OS
+      ansible.builtin.set_fact:
+        detected_os: "{{ all_gathered_facts.ansible_network_os | default('unknown') }}"
+    - name: Include Cisco IOS verification
+      ansible.builtin.include_tasks: cisco_ios_verify.yml
+      when: "'cisco.ios.ios' in detected_os"
+
+    - name: Include Ciso NXOS verification
+      ansible.builtin.include_tasks: cisco_nxos_verify.yml
+      when: "'cisco.nxos.nxos' in detected_os"
+
+    - name: Include Ciso NXOS verification
+      ansible.builtin.include_tasks: arista_eos_verify.yml
+      when: "'arista.eos.eos' in detected_os"
+
+    - name: Include Ciso NXOS verification
+      ansible.builtin.include_tasks: cisco_iosxr_verify.yml
+      when: "'cisco.iosxr.iosxr' in detected_os"
 
     - name: Display gathered interfaces
       ansible.builtin.debug:
-        var: all_gathered_facts.interfaces
+        var: all_gathered_facts
         verbosity: 1
 
 - name: Debug
