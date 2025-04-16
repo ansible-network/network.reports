@@ -8,10 +8,31 @@
 
 - The **Ansible Network Reports Collection** provides a platform-agnostic way to gather, generate, persist, and visualize network resource reports. 
   This collection enables users to collect network facts, convert them into structured formats (YAML, JSON), and visualize them as HTML reports using Jinja2 templates.
+  
+- This collection includes the following roles:
+
+- **`gather`**: Collect comprehensive network device facts for specified resources, including hardware details, using native parsers.
+- **`generate_report`**: Generate structured HTML reports from previously gathered network facts for visualization and analysis.
+- **`persist`**: Store gathered network facts in YAML format to local directories or remote SCM repositories, establishing a source of truth (SOT).
 
 - This collection can be used by **network administrators**, **system operators**, and **IT professionals** looking to monitor and manage their network infrastructure through automated reporting.
 
 ![Screenshot from 2025-02-11 17-30-19](https://github.com/user-attachments/assets/8f822ffd-519b-4cf8-915b-9c73351d46a5)
+
+## Included content
+
+Click on the name of a role to view its documentation:
+
+<!--start collection content-->
+### Roles
+
+Name                                                 | Description
+---------------------------------------------------- | -----------
+[network.reports.gather](roles/gather/README.md)     | Collect comprehensive network device facts using native parsers.
+[network.reports.generate_report](roles/generate_report/README.md) | Generate structured HTML reports from gathered network facts.
+[network.reports.persist](roles/persist/README.md)       | Store gathered network facts to local or remote repositories (SCM).
+
+<!--end collection content-->
 
 
 
@@ -63,10 +84,6 @@ ansible-galaxy collection install network.reports
     - name: Network Resource Manager
       ansible.builtin.include_role:
         name: network.reports.gather
-      vars:
-        format:
-          - yaml
-          - json
         resources:
           - interfaces
           - l2_interfaces
@@ -85,8 +102,6 @@ ansible-galaxy collection install network.reports
     - name: Generate Network Report
       ansible.builtin.include_role:
         name: network.reports.generate_web_report
-      vars:
-        file_path: "./network_reports"
 ```
 
 ### 3. Persist Network Reports to SCM (GitHub/GitLab)
