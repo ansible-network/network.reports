@@ -90,6 +90,9 @@ This collection enables users to perform the following reporting tasks:
           - l2_interfaces
           - bgp_global
 ```
+Example Output
+When the playbook is executed successfully, the output will display the all_gathered_facts for the specified resources.
+
 
 `Generate HTML Reports from Network Facts`
 - The `generate_report` role allows users to convert previously gathered network facts into structured HTML reports using Jinja2 templates, providing a visual representation of the network state.
@@ -104,6 +107,11 @@ This collection enables users to perform the following reporting tasks:
       ansible.builtin.include_role:
         name: network.reports.generate_report
 ```
+Example Output
+
+- This task collects information from the network devices about all the resources of that device.
+
+- After the facts have been gathered, the next task is to generate the web report. This task runs locally on the localhost. The output of the network.reports.generate_report task will produce an HTML file summarizing the gathered facts.
 
 `Persist Network Data as Source of Truth (SOT)`
 - The `persist` role enables users to store gathered network facts (not just reports) in YAML format to local directories or remote SCM (like GitHub/GitLab) repositories. This establishes a version-controlled source of truth for network configuration data, useful for backup, audit, or driving configuration deployment.
@@ -128,6 +136,7 @@ This collection enables users to perform the following reporting tasks:
                 name: "{{ git_user_name }}"
                 email: "{{ git_user_email }}"
 ```
+Example Output When the playbook is executed, the persisted facts will be saved in the specified data store in a structured YAML format.
 
 ## Testing
 
