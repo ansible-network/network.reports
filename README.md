@@ -138,6 +138,53 @@ Example Output
 ```
 Example Output When the playbook is executed, the persisted facts will be saved in the specified data store in a structured YAML format.
 
+## Multi-Host Reporting Scenario
+
+This collection is designed to efficiently handle inventories with multiple network devices, even across different network operating systems. The `gather` role collects facts individually from each targeted host, and the `generate_report` role consolidates these facts into a single, unified HTML report.
+
+Let's illustrate with an example:
+
+**1. Example Inventory (`inventory.ini`)**
+
+Define your network devices in an Ansible inventory file. Ensure you specify the correct `ansible_network_os` for each device, along with connection details.
+
+```ini
+[network_devices]
+ios_router ansible_host=192.168.1.10 ansible_user=cisco ansible_ssh_pass=your_password ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.ios.ios
+nxos_switch ansible_host=192.168.1.20 ansible_user=admin ansible_ssh_pass=your_password ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.nxos.nxos
+
+[network_devices:vars]
+ ansible-1 ansible_host=54.190.208.146 ansible_ssh_port=2088 ansible_user=cisco ansible_ssh_password=cisco ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.ios.ios
+ ansible-2 ansible_host=54.190.208.146 ansible_ssh_port=2024 ansible_user=cisco ansible_ssh_password=cisco ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.nxos.nxos
+```
+This playbook uses two plays: the first gathers facts from all devices in the network_devices group, and the second generates a single report (localhost).
+
+```yaml
+- name: Play 1 - Gather Facts from Multiple Network Devices
+  hosts: network_devices # Targets all hosts in the group defined in inventory
+  gather_facts: false
+  tasks:
+    - name: Invoke gather role for interfaces and L2 interfaces
+      ansible.builtin.include_role:
+        name: network.reports.gather
+      vars:
+        resources:
+          - "interfaces"
+          - "l2_interfaces"
+          # Add other resources as needed, e.g., "bgp_global", "lldp_neighbors"
+
+- name: Play 2 - Generate Consolidated HTML Report
+  hosts: localhost   
+  gather_facts: false
+  tasks:
+    - name: Generate report from all gathered facts
+      ansible.builtin.include_role:
+        name: network.reports.generate_report 
+```
+Resulting Report:
+
+The generated HTML report will contain sections or tables summarizing the gathered information (interfaces, L2 interfaces) for both ios_router and nxos_switch. You will be able to see the data from all targeted devices consolidated within that single report file, often allowing filtering or sorting by hostname, making it easy to compare configurations or states across your network.
+
 ## Testing
 
 The project uses **tox** to run `ansible-lint` and `ansible-test sanity`. Assuming this repository is checked out in the proper structure, e.g., `collections_root/ansible_collections/network/reports`, run:
