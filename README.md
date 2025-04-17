@@ -142,7 +142,7 @@ Example Output When the playbook is executed, the persisted facts will be saved 
 
 This collection is designed to efficiently handle inventories with multiple network devices, even across different network operating systems. The `gather` role collects facts individually from each targeted host, and the `generate_report` role consolidates these facts into a single, unified HTML report.
 
-Let's illustrate with an example:
+Example Playbook:
 
 **1. Example Inventory (`inventory.ini`)**
 
@@ -183,7 +183,7 @@ This playbook uses two plays: the first gathers facts from all devices in the ne
 ```
 Resulting Report:
 
-The generated HTML report will contain sections or tables summarizing the gathered information (interfaces, L2 interfaces) for both ios_router and nxos_switch. You will be able to see the data from all targeted devices consolidated within that single report file, often allowing filtering or sorting by hostname, making it easy to compare configurations or states across your network.
+The generated HTML report will contain sections or tables summarizing the gathered information (interfaces, L2 interfaces) for both ios_router and nxos_switch. We will be able to see the data from all targeted devices consolidated within that single report file.
 
 ## Testing
 
