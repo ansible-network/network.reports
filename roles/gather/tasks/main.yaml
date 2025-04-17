@@ -1,6 +1,30 @@
 ---
-- name: Include tasks
+- name: Include validation tasks
   ansible.builtin.include_tasks: validation.yaml
 
-- name: Run the platform specific tasks
-  ansible.builtin.include_tasks: gather.yaml
+- name: Include network resource tasks
+  ansible.builtin.include_tasks: network_resources.yaml
+
+- name: Include system resouces tasks
+  ansible.builtin.include_tasks: system_resources.yaml
+
+- name: Add system resources to all_gathered_facts
+  ansible.builtin.set_fact:
+    all_gathered_facts: "{{ all_gathered_facts | combine(system_resources) }}"
+
+- name: Add ansible_network_os to all_gathered_facts
+  ansible.builtin.set_fact:
+    all_gathered_facts: "{{ all_gathered_facts | combine({'ansible_network_os': ansible_network_os}) }}"
+
+- name: Debug combined facts
+  ansible.builtin.debug:
+    var: all_gathered_facts
+
+- name: Display gathered facts as JSON
+  ansible.builtin.debug:
+    msg: "{{ all_gathered_facts | to_json }}"
+
+# Display all gathered facts in XML format
+- name: Display gathered facts as XML
+  ansible.builtin.debug:
+    msg: "{{ all_gathered_facts | to_nice_yaml }}"

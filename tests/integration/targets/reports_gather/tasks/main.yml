@@ -1,0 +1,49 @@
+---
+- name: Debug
+  ansible.builtin.debug:
+    msg: "START network.reports gather operation integration tests on connection={{ ansible_connection }}"
+
+- name: Perform gather operation for network resources
+  block:
+    - name: Run network.reports.gather role to collect interface information
+      ansible.builtin.include_role:
+        name: network.reports.gather
+      vars:
+        resources:
+          - "interfaces"
+          - "l2_interfaces"
+          - "l3_interfaces"
+          - "ospf_interfaces"
+          - "ospfv2"
+          - "ospfv3"
+          - "bgp_global"
+          - "bgp_address_family"
+      register: gather_result
+
+    - name: Determine network OS
+      ansible.builtin.set_fact:
+        detected_os: "{{ all_gathered_facts.ansible_network_os | default('unknown') }}"
+    - name: Include Cisco IOS verification
+      ansible.builtin.include_tasks: cisco_ios_verify.yml
+      when: "'cisco.ios.ios' in detected_os"
+
+    - name: Include Ciso NXOS verification
+      ansible.builtin.include_tasks: cisco_nxos_verify.yml
+      when: "'cisco.nxos.nxos' in detected_os"
+
+    - name: Include Ciso NXOS verification
+      ansible.builtin.include_tasks: arista_eos_verify.yml
+      when: "'arista.eos.eos' in detected_os"
+
+    - name: Include Ciso NXOS verification
+      ansible.builtin.include_tasks: cisco_iosxr_verify.yml
+      when: "'cisco.iosxr.iosxr' in detected_os"
+
+    - name: Display gathered interfaces
+      ansible.builtin.debug:
+        var: all_gathered_facts
+        verbosity: 1
+
+- name: Debug
+  ansible.builtin.debug:
+    msg: "END network.reports gather operation integration tests on connection={{ ansible_connection }}"

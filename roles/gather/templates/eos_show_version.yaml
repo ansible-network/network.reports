@@ -1,0 +1,58 @@
+---
+- name: "eos_hardware_version"
+  getval: "^Hardware\\sversion:\\s+(?P<hardware_version>.*)$"
+  result:
+    hardware:
+      version: "{{ hardware_version | default('') }}"
+- name: "eos_serial_number"
+  getval: "^Serial\\snumber:\\s+(?P<serial_number>.*)$"
+  result:
+    hardware:
+      serial_number: "{{ serial_number | default('') }}"
+- name: "eos_hardware_mac"
+  getval: "^Hardware\\sMAC\\saddress:\\s+(?P<hardware_mac>\\S+)$"
+  result:
+    hardware:
+      mac_address: "{{ hardware_mac }}"
+- name: "eos_system_mac"
+  getval: "^System\\sMAC\\saddress:\\s+(?P<system_mac>\\S+)$"
+  result:
+    system:
+      mac_address: "{{ system_mac }}"
+- name: "eos_software_version"
+  getval: "^Software\\simage\\sversion:\\s(?P<software_version>.*)$"
+  result:
+    version: "{{ software_version }}"
+- name: "eos_architecture"
+  getval: "^Architecture:\\s+(?P<architecture>\\S+)$"
+  result:
+    system:
+      architecture: "{{ architecture }}"
+- name: "eos_internal_build_version"
+  getval: "^Internal\\sbuild\\sversion:\\s(?P<internal_build_version>.*)$"
+  result:
+    build_info:
+      internal_build_version: "{{ internal_build_version }}"
+- name: "eos_internal_build_id"
+  getval: "^Internal\\sbuild\\sID:\\s+(?P<internal_build_id>.*)$"
+  result:
+    build_info:
+      internal_build_id: "{{ internal_build_id }}"
+- name: "eos_uptime"
+  getval: "^Uptime:\\s+(?P<weeks>\\d+)\\sweeks,\\s(?P<days>\\d+)\\sdays,\\s(?P<hours>\\d+)\\shours\\sand\\s(?P<minutes>\\d+)\\sminutes$"
+  result:
+    uptime:
+      weeks: "{{ weeks }}"
+      days: "{{ days }}"
+      hours: "{{ hours }}"
+      minutes: "{{ minutes }}"
+- name: "eos_total_memory"
+  getval: "^Total\\smemory:\\s+(?P<total_memory>\\d+)\\skB$"
+  result:
+    memory:
+      total_mb: "{{ (total_memory | float) / 1024 }}"
+- name: "eos_free_memory"
+  getval: "^Free\\smemory:\\s+(?P<free_memory>\\d+)\\skB$"
+  result:
+    memory:
+      free_mb: "{{ (free_memory | float) / 1024 }}"

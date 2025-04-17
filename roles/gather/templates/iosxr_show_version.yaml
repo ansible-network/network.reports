@@ -1,0 +1,53 @@
+---
+- name: "ios_xr_version"
+  getval: "Cisco\\s(?P<os>\\w+\\s\\w+)\\sSoftware,\\sVersion\\s(?P<version>\\S+)"
+  result:
+    version: "{{ version }}"
+    os_type: "{{ os }}"
+
+- name: "model_type"
+  getval: "(?P<model>\\S+\\s\\S+\\s\\S+)\\s\\(\\)\\sprocessor"
+  result:
+    hardware:
+      model: "{{ model }}"
+- name: "build_info"
+  getval: "\\sBuilt\\sBy\\s+:\\s(?P<built_by>\\S+)"
+  result:
+    build_info:
+      built_by: "{{ built_by }}"
+- name: "build_date"
+  getval: "\\sBuilt\\sOn\\s+:\\s(?P<built_on>.*)"
+  result:
+    build_info:
+      built_on: "{{ built_on }}"
+- name: "build_host"
+  getval: "\\sBuilt\\sHost\\s+:\\s(?P<built_host>\\S+)"
+  result:
+    build_info:
+      built_host: "{{ built_host }}"
+- name: "workspace"
+  getval: "\\sWorkspace\\s+:\\s(?P<workspace>.*)"
+  result:
+    build_info:
+      workspace: "{{ workspace }}"
+- name: "location"
+  getval: "\\sLocation\\s+:\\s(?P<location>.*)"
+  result:
+    build_info:
+      location: "{{ location }}"
+- name: "label"
+  getval: "\\sLabel\\s+:\\s(?P<label>.*)"
+  result:
+    build_info:
+      label: "{{ label }}"
+- name: "hardware"
+  getval: "cisco\\s(?P<model>.*)\\(\\)\\sprocessor"
+
+- name: "uptime"
+  getval: "System\\suptime\\sis\\s(?P<weeks>\\d+)\\sweeks\\s(?P<days>\\d+)\\sdays\\s(?P<hours>\\d+)\\shours\\s(?P<minutes>\\d+)\\sminutes"
+  result:
+    uptime:
+      weeks: "{{ weeks | default('0') }}"
+      days: "{{ days | default('0') }}"
+      hours: "{{ hours | default('0') }}"
+      minutes: "{{ minutes | default('0') }}"

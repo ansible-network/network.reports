@@ -6,10 +6,6 @@
     state: gathered
   register: gather_result
 
-# - name: Append resource facts to a global list
-#   ansible.builtin.set_fact:
-#     all_gathered_facts: "{{ all_gathered_facts | default([]) + [gather_result] }}"
-
 - name: Append resource facts to a global dictionary
   ansible.builtin.set_fact:
     all_gathered_facts: >-
@@ -18,9 +14,3 @@
 - name: Display resource facts
   ansible.builtin.debug:
     msg: "{{ gather_result }}"
-
-
-
-# - name: Build a report
-#   ansible.builtin.include_role:
-#     name: "/home/rothakur/ansible-collections/collections/ansible_collections/network/reports/roles/build_report_container"

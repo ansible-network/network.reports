@@ -1,0 +1,40 @@
+---
+# Cisco IOS verification template
+
+- name: Set Cisco IOS verification facts
+  ansible.builtin.set_fact:
+    ios_verification:
+      # Basic system information
+      system:
+        hostname: "{{ all_gathered_facts.device_name }}"
+        version: "{{ all_gathered_facts.version }}"
+        model: "{{ all_gathered_facts.hardware.model }}"
+        serial: "{{ all_gathered_facts.hardware.serial_number }}"
+
+      # Interface information
+      interfaces:
+        count: "{{ all_gathered_facts.interfaces | length }}"
+        enabled: "{{ all_gathered_facts.interfaces | selectattr('enabled', 'eq', true) | list | length }}"
+        l3_interfaces: "{{ all_gathered_facts.l3_interfaces | length }}"
+
+      # Routing protocols
+      routing:
+        bgp:
+          configured: "{{ all_gathered_facts.bgp_global is defined }}"
+          as_number: "{{ all_gathered_facts.bgp_global.as_number | default('not configured') }}"
+          neighbors: "{{ all_gathered_facts.bgp_global.neighbors | default([]) | length }}"
+        ospf:
+          configured: "{{ all_gathered_facts.ospfv2 is defined and all_gathered_facts.ospfv2.processes is defined }}"
+          process_count: "{{ all_gathered_facts.ospfv2.processes | default([]) | length }}"
+
+      # Memory and licensing
+      resources:
+        memory: "{{ all_gathered_facts.memory.total_mb | default('unknown') }} MB"
+        license_type: "{{ all_gathered_facts.license.type | default('unknown') }}"
+  when: all_gathered_facts.ansible_network_os is defined and 'cisco.ios.ios' in all_gathered_facts.ansible_network_os
+
+- name: Display Cisco IOS verification results
+  ansible.builtin.debug:
+    var: ios_verification
+  when:
+    - ios_verification is defined

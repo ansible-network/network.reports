@@ -1,39 +1,44 @@
 # gather
 
 ## Overview
-The `gather` role enables users to collect and display structured facts for provided network resources. This role helps administrators gain insights into the current state of network configurations in a standardized format.
+
+The `gather` role collects comprehensive network device facts, including hardware details using native parsers.
 
 ## Features
+
 - Retrieve structured facts for specified network resources.
+- Gathers detailed hardware information from network devices using native parsers
 - Support for various network resources like `bgp_global`, `interfaces`, `vlans`, etc.
-- Provides data in YAML format for easy consumption and analysis.
+- Provides data in both YAML and XML formats for easy consumption and analysis.
 
 ## Variables
 
-| Variable Name        | Default Value | Required | Type | Description                                                   | Example |
-|:---------------------|:-------------:|:--------:|:----:|:-------------------------------------------------------------|:-------:|
-| `ansible_network_os` | `""`          | no      | str  | Network OS to be used during gather.                    | `"cisco.ios.ios"` |
-| `resources`          | `[all]`       | no       | list | List of resources for which facts need to be gathered.        | `['bgp_global', 'bgp_address_family']` |
+| Variable Name        | Default Value | Required | Type | Description                                            |                Example                 |
+| :------------------- | :-----------: | :------: | :--: | :----------------------------------------------------- | :------------------------------------: |
+| `ansible_network_os` |     `""`      |    no    | str  | Network OS to be used during gather.                   |           `"cisco.ios.ios"`            |
+| `resources`          |    `[all]`    |    no    | list | List of resources for which facts need to be gathered. | `['bgp_global', 'bgp_address_family']` |
 
 ## Usage
+
 Below is an example playbook demonstrating how to use the `gather` role, where we will retrieve facts for the specified network resources:
 
 ```yaml
 ---
 - name: Gather structured facts for network resources
   hosts: all
-  gather_facts: true
+  gather_facts: false
   tasks:
     - name: Invoke gather role
       ansible.builtin.include_role:
-        name: network.base.gather
+        name: network.reports.gather
       vars:
         resources:
-          - 'bgp_global'
-          - 'bgp_address_family'
+          - "bgp_global"
+          - "bgp_address_family"
 ```
+
 Example Output
-When the playbook is executed successfully, the output will display the structured facts for the specified resources.
+When the playbook is executed successfully, the output will display the all_gathered_facts for the specified resources.
 
 ## License
 
