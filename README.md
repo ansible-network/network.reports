@@ -41,11 +41,10 @@ Name                                                 | Description
 - [Requires Content Collections](https://github.com/redhat-cop/network.reports/blob/main/galaxy.yml)
 - [Testing Requirements](https://github.com/redhat-cop/network.reports/blob/main/test-requirements.txt)
 - Users also need to include platform collections as per their requirements. The supported platform collections are:
-  - [arista.eos](https://github.com/ansible-collections/arista.eos)
-  - [cisco.ios](https://github.com/ansible-collections/cisco.ios)
-  - [cisco.iosxr](https://github.com/ansible-collections/cisco.iosxr)
-  - [cisco.nxos](https://github.com/ansible-collections/cisco.nxos)
-  - [junipernetworks.junos](https://github.com/ansible-collections/junipernetworks.junos)
+  - [arista.eos](https://github.com/ansible-collections/arista.eos) >= v11.0.0  
+  - [cisco.ios](https://github.com/ansible-collections/cisco.ios) >= v10.0.0    
+  - [cisco.iosxr](https://github.com/ansible-collections/cisco.iosxr) >= v11.0.0 
+  - [cisco.nxos](https://github.com/ansible-collections/cisco.nxos) >= v10.0.0
 
 ## Installation
 To consume this Validated Content from Automation Hub, the following needs to be added to `ansible.cfg`:
@@ -72,57 +71,62 @@ ansible-galaxy collection install network.reports
 
 ## Use Cases
 
-### 1. Gather Network Resource Reports
-- Collect network resource facts like interfaces, BGP configurations, OSPF settings, etc.
-- Convert these facts into **YAML**, **JSON**, or **HTML** formats.
+This collection enables users to perform the following reporting tasks:
+
+`Gather Network Resource Reports`
+- The `gather` role enables users to collect comprehensive network device facts for specified resources (like interfaces, BGP configurations, etc.), including hardware details, using native parsers. These facts form the basis for reports and persisted data.
 
 ```yaml
-- name: Gather Network Reports
+- name: Gather Network Reports for specific resources
   hosts: network_devices
   gather_facts: false
   tasks:
-    - name: Network Resource Manager
+    - name: Invoke gather role for interfaces and BGP
       ansible.builtin.include_role:
         name: network.reports.gather
+      vars:
         resources:
           - interfaces
           - l2_interfaces
           - bgp_global
 ```
 
-### 2. Generate HTML Reports from Network Facts
-- Convert collected facts into **HTML web reports** using Jinja2 templates.
-- Run a lightweight **web server** to visualize the reports.
+`Generate HTML Reports from Network Facts`
+- The `generate_report` role allows users to convert previously gathered network facts into structured HTML reports using Jinja2 templates, providing a visual representation of the network state.
 
 ```yaml
 - name: Generate Network HTML Report
-  hosts: network_devices
+  hosts: localhost
   gather_facts: false
+  # Assumes facts were gathered previously (e.g., by the gather role)
   tasks:
-    - name: Generate Network Report
+    - name: Generate Report from gathered facts
       ansible.builtin.include_role:
-        name: network.reports.generate_web_report
+        name: network.reports.generate_report
 ```
 
-### 3. Persist Network Reports to SCM (GitHub/GitLab)
-- Persist generated reports into **GitHub** or **GitLab** repositories for version control and audit.
+`Persist Network Data as Source of Truth (SOT)`
+- The `persist` role enables users to store gathered network facts (not just reports) in YAML format to local directories or remote SCM (like GitHub/GitLab) repositories. This establishes a version-controlled source of truth for network configuration data, useful for backup, audit, or driving configuration deployment.
 
 ```yaml
-- name: Persist Reports to GitHub
-  hosts: network_devices
+- name: Persist Gathered Facts to SCM
+  hosts: network_devices # Target your network devices group
   gather_facts: false
+  # Assumes facts were gathered previously (e.g., by the gather role)
   tasks:
-    - name: Persist Reports to GitHub Repository
+    - name: Persist Facts to GitHub Repository
       ansible.builtin.include_role:
         name: network.reports.persist
       vars:
-        scm:
-          origin:
-            url: "{{ github_repo_url }}"
-            token: "{{ github_access_token }}"
-            user:
-              name: "{{ git_user_name }}"
-              email: "{{ git_user_email }}"
+        data_store:
+          scm:
+            parent_directory: "/tmp/network_reports_repo" 
+            origin:
+              url: "{{ github_repo_url }}" 
+              token: "{{ github_access_token }}"
+              user:
+                name: "{{ git_user_name }}"
+                email: "{{ git_user_email }}"
 ```
 
 ## Testing
@@ -136,7 +140,7 @@ The project uses **tox** to run `ansible-lint` and `ansible-test sanity`. Assumi
 
 To run integration tests, ensure that your inventory has a `network_reports` group.
 
-```shell
+```ini
 [network_devices]
 ios
 junos
@@ -184,10 +188,6 @@ Release notes are available [here](https://github.com/redhat-cop/network.reports
 - [Ansible Community Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html)
 
 ## Licensing
-
-GNU General Public License v3.0 or later.
-
-See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
 
 GNU General Public License v3.0 or later.
 
