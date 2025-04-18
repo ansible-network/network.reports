@@ -7,6 +7,7 @@
     parent_directory: "{{ data_store.scm.parent_directory | default(persist_inventory_directory) }}"
   changed_when: false
   register: persist_result
+  run_once: true
 
 - name: Update data store path
   ansible.builtin.set_fact:

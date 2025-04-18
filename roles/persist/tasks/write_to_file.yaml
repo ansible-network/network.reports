@@ -1,14 +1,18 @@
 ---
-- name: Create inventory directory
+- name: Ensure inventory directory exists
   ansible.builtin.file:
     path: "{{ persist_inventory_path }}/host_vars/{{ inventory_hostname }}"
     state: directory
     mode: "0777"
   delegate_to: localhost
 
+- name: Initialize persist_results if empty
+  ansible.builtin.set_fact:
+    persist_results: "{{ persist_result if persist_results is not defined or persist_results | length == 0 else persist_results | combine(persist_result, recursive=True) }}"
+
 - name: Write persist resource to a file
   ansible.builtin.copy:
-    content: "{{ persist_result}}"
+    content: "{{ persist_results | to_nice_yaml(indent=2) }}"
     dest: "{{ persist_inventory_path }}/host_vars/{{ inventory_hostname }}.yaml"
     mode: "0777"
   delegate_to: localhost

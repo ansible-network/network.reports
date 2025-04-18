@@ -1,0 +1,34 @@
+- name: Parse show version
+  ansible.utils.cli_parse:
+    command: "show version"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: version_data
+
+- name: Parse hostname
+  ansible.utils.cli_parse:
+    command: "sh running-config | include hostname"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: hostname_resources
+
+- name: Parse license
+  ansible.utils.cli_parse:
+    command: "show license all"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: license_data
+
+# Combine all into one system_resources
+- name: Combine all resources into system_resources
+  ansible.builtin.set_fact:
+    result: >-
+      {{
+        version_data
+        | combine(hostname_resources, recursive=True)
+        | combine(license_data, recursive=True)
+      }}
+
+- name: Append to all results
+  ansible.builtin.set_fact:
+    persist_result: "{{ persist_result | default([]) | list + [result] }}"
