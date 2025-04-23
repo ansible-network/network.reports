@@ -4,7 +4,9 @@
     parser:
       name: ansible.netcommon.native
     set_fact: version_data
-
+- name: debug
+  debug:
+    var: version_data
 - name: Parse hostname
   ansible.utils.cli_parse:
     command: "sh running-config | include hostname"
@@ -19,6 +21,13 @@
       name: ansible.netcommon.native
     set_fact: license_data
 
+- name: Parse Memory
+  ansible.utils.cli_parse:
+    command: "show memory summary"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: memory_resources
+
 # Combine all into one system_resources
 - name: Combine all resources into system_resources
   ansible.builtin.set_fact:
@@ -27,4 +36,5 @@
         version_data
         | combine(hostname_resources, recursive=True)
         | combine(license_data, recursive=True)
+        | combine(memory_resources, recursive=True)
       }}

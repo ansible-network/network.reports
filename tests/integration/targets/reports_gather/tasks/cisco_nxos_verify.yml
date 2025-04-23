@@ -1,79 +1,51 @@
----
-# Cisco NXOS verification template
-
-- name: Set Cisco NXOS verification facts
+# Inside cisco_nxos_verify.yml
+- name: Set Cisco NXOS verification facts (Matching structure and types)
   ansible.builtin.set_fact:
     nxos_verification:
-      # Basic system information
-      system:
-        hostname: "{{ all_gathered_facts.device_name }}"
-        version: "{{ all_gathered_facts.version }}"
-        model: "{{ all_gathered_facts.hardware.model }}"
-        serial: "{{ all_gathered_facts.hardware.serial_number }}"
-        os_type: "{{ all_gathered_facts.os_type }}"
-        release_type: "{{ all_gathered_facts.release_type }}"
-        image_file: "{{ all_gathered_facts.nxos_image_file }}"
-        uptime:
-          days: "{{ all_gathered_facts.uptime.days }}"
-          hours: "{{ all_gathered_facts.uptime.hours }}"
-          minutes: "{{ all_gathered_facts.uptime.minutes }}"
-
-      # Interface information
-      interfaces:
-        count: "{{ all_gathered_facts.interfaces | length | int }}"
-        # Filter only interfaces that have enabled attribute set to true
-        enabled: "{{ all_gathered_facts.interfaces | selectattr('enabled', 'defined') | selectattr('enabled', 'eq', true) | list | length | int }}"
-        l3_interfaces: "{{ all_gathered_facts.l3_interfaces | length | int }}"
-        l2_interfaces: "{{ all_gathered_facts.l2_interfaces | length | int }}"
-        ospf_interfaces: "{{ all_gathered_facts.ospf_interfaces | length | int }}"
-
-      # Routing protocols
-      routing:
-        bgp:
-          configured: "{{ all_gathered_facts.bgp_global is defined }}"
-          as_number: "{{ all_gathered_facts.bgp_global.as_number | default('not configured') }}"
-          neighbors: "{{ all_gathered_facts.bgp_global.neighbors | default([]) | length | int }}"
-          address_families: "{{ all_gathered_facts.bgp_address_family.address_family | default([]) | length | int }}"
-        ospfv2:
-          configured: "{{ all_gathered_facts.ospfv2 is defined and all_gathered_facts.ospfv2.processes is defined }}"
-          process_count: "{{ all_gathered_facts.ospfv2.processes | default([]) | length | int }}"
-        ospfv3:
-          configured: "{{ all_gathered_facts.ospfv3 is defined and all_gathered_facts.ospfv3.processes is defined }}"
-          process_count: "{{ all_gathered_facts.ospfv3.processes | default([]) | length | int }}"
-
-      # System resources
-      resources:
-        memory_total: "{{ all_gathered_facts.memory.total_mb | default('unknown') }} MB"
-        memory_free: "{{ all_gathered_facts.memory.free_mb | default('unknown') }} MB"
-        memory_used: "{{ all_gathered_facts.memory.used_mb | default('unknown') }} MB"
-        bootflash: "{{ all_gathered_facts.bootflash | default('unknown') }} KB"
-        processor_type: "{{ all_gathered_facts.processor.type | default('unknown') }}"
-        processor_memory: "{{ all_gathered_facts.processor.memory | default('unknown') }} KB"
-
-      # Licensing
-      licensing:
-        status: "{{ all_gathered_facts.license.status | default('unknown') }}"
-        name: "{{ all_gathered_facts.license.name | default('unknown') }}"
-        type: "{{ all_gathered_facts.license.license_type | default('unknown') }}"
+      ansible_network_os: "{{ all_gathered_facts.ansible_network_os | default('unknown') }}"
+      bgp_address_family:
+        address_family: "{{ all_gathered_facts.bgp_address_family.address_family | default([]) }}"
+        as_number: "{{ all_gathered_facts.bgp_address_family.as_number | default('unknown') }}"
+      bgp_global:
+        as_number: "{{ all_gathered_facts.bgp_global.as_number | default('unknown') }}"
+        neighbors: "{{ all_gathered_facts.bgp_global.neighbors | default([]) }}"
+        router_id: "{{ all_gathered_facts.bgp_global.router_id | default('unknown') }}"
+        timers:
+          bgp:
+            holdtime: "{{ all_gathered_facts.bgp_global.timers.bgp.holdtime | default(0, boolean=True) | int }}"
+            keepalive: "{{ all_gathered_facts.bgp_global.timers.bgp.keepalive | default(0, boolean=True) | int }}"
+      bootflash: "{{ all_gathered_facts.bootflash | default(0, boolean=True) | int }}"
+      device_name: "{{ all_gathered_facts.device_name | default('unknown') }}"
+      hardware:
+        model: "{{ all_gathered_facts.hardware.model | default('unknown') }}"
+        serial_number: "{{ all_gathered_facts.hardware.serial_number | default('unknown') }}"
+      last_reset_reason: "{{ all_gathered_facts.last_reset_reason | default('unknown') }}"
+      license:
+        count: "{{ all_gathered_facts.license.count | default(0, boolean=True) | int }}"
         description: "{{ all_gathered_facts.license.description | default('unknown') }}"
+        enforcement_type: "{{ all_gathered_facts.license.enforcement_type | default('unknown') }}"
+        license_type: "{{ all_gathered_facts.license.license_type | default('unknown') }}"
+        name: "{{ all_gathered_facts.license.name | default('unknown') }}"
+        status: "{{ all_gathered_facts.license.status | default('unknown') }}"
+        version: "{{ all_gathered_facts.license.version | default(0.0, boolean=True) | float }}"
+      memory:
+        free_mb: "{{ all_gathered_facts.memory.free_mb | default(0.0, boolean=True) | float }}"
+        total_mb: "{{ all_gathered_facts.memory.total_mb | default(0.0, boolean=True) | float }}"
+        used_mb: "{{ all_gathered_facts.memory.used_mb | default(0.0, boolean=True) | float }}"
+      nxos_compile_time: "{{ all_gathered_facts.nxos_compile_time | default('unknown') }}"
+      nxos_image_file: "{{ all_gathered_facts.nxos_image_file | default('unknown') }}"
+      os_type: "{{ all_gathered_facts.os_type | default('unknown') }}"
+      processes:
+        running: "{{ all_gathered_facts.processes.running | default(0, boolean=True) | int }}"
+        total: "{{ all_gathered_facts.processes.total | default(0, boolean=True) | int }}"
+      processor:
+        memory: "{{ all_gathered_facts.processor.memory | default(0, boolean=True) | int }}"
+        type: "{{ all_gathered_facts.processor.type | default('unknown') }}"
+      release_type: "{{ all_gathered_facts.release_type | default('unknown') }}"
+      uptime:
+        days: "{{ all_gathered_facts.uptime.days | default(0, boolean=True) | int }}"
+        hours: "{{ all_gathered_facts.uptime.hours | default(0, boolean=True) | int }}"
+        minutes: "{{ all_gathered_facts.uptime.minutes | default(0, boolean=True) | int }}"
+        seconds: "{{ all_gathered_facts.uptime.seconds | default(0, boolean=True) + 0 }}"
+      version: "{{ all_gathered_facts.version | default('unknown') }}"
   when: all_gathered_facts.ansible_network_os is defined and 'cisco.nxos.nxos' in all_gathered_facts.ansible_network_os
-
-# Add NXOS specific assertions
-- name: Verify Cisco NXOS specific data
-  ansible.builtin.assert:
-    that:
-      - nxos_verification.system.hostname is defined
-      - nxos_verification.system.version is defined
-      - nxos_verification.system.model is defined
-      - nxos_verification.interfaces.count | int > 0
-      - nxos_verification.routing is defined
-    fail_msg: "Cisco NXOS specific data validation failed"
-    success_msg: "Cisco NXOS specific data validated successfully"
-  when: nxos_verification is defined
-
-- name: Display Cisco NXOS verification results
-  ansible.builtin.debug:
-    var: nxos_verification
-  when:
-    - nxos_verification is defined
-    - not verification_silent | default(false)

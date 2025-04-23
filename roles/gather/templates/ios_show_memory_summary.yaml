@@ -1,0 +1,7 @@
+---
+- name: "Total Memory"
+  getval: "Processor\\s+\\w+\\s+(?P<mem_total>\\d+)\\s+\\d+\\s+(?P<mem_free>\\d+)\\s+\\d+\\s+\\d+"
+  result:
+    memory:
+      total_mb: "{{ (mem_total | float) / 1024 }}"
+      free_mb: "{{ (mem_free | float) / 1024 }}"

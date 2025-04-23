@@ -20,6 +20,10 @@
   ansible.builtin.include_tasks: retrieve.yaml
   when: data_store['scm'] is defined
 
+- name: Ensure persist_result is initialized as an empty list
+  ansible.builtin.set_fact:
+    persist_result: []
+
 - name: Include facts tasks
   ansible.builtin.include_tasks: facts.yaml
   loop: "{{ persist_network_resources['actionable'] }}"
@@ -28,6 +32,10 @@
 
 - name: Include System resources
   ansible.builtin.include_tasks: system_resources.yaml
+
+- name: Add gathered system data structure under 'device_info' key
+  ansible.builtin.set_fact:
+    persist_result: "{{ persist_result | default([]) + [ {'device_info': gathered_system_data | default({}) } ] }}"
 
 - name: write to file
   ansible.builtin.include_tasks: write_to_file.yaml

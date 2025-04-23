@@ -32,4 +32,4 @@
 
 - name: Append to all results
   ansible.builtin.set_fact:
-    persist_result: "{{ persist_result | default([]) | list + [result] }}"
+    gathered_system_data: "{{ gathered_system_data | default([]) | list + [result] }}"

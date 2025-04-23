@@ -8,4 +8,4 @@
 
 - name: Append to all results
   ansible.builtin.set_fact:
-    persist_result: "{{ persist_result | default([]) | list + [result.gathered] }}"
+    persist_result: "{{ persist_result | default([]) | to_nice_yaml(indent=2) | from_yaml + [ dict([(res, result.gathered)]) ] }}"
