@@ -4,9 +4,7 @@
     parser:
       name: ansible.netcommon.native
     set_fact: version_data
-- name: debug
-  debug:
-    var: version_data
+
 - name: Parse hostname
   ansible.utils.cli_parse:
     command: "sh running-config | include hostname"
