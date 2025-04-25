@@ -27,18 +27,6 @@ Below are examples demonstrating how to use the `persist` role:
 In this example, gathered facts are stored in a local directory:
 
 ```yaml
-- name: Gather structured facts for network resources
-  hosts: all
-  gather_facts: false
-  tasks:
-    - name: Invoke gather role
-      ansible.builtin.include_role:
-        name: network.reports.gather
-      vars:
-        resources:
-          - "bgp_global"
-          - "bgp_address_family"
-
 - name: persist
   hosts: all
   become: true
@@ -47,6 +35,9 @@ In this example, gathered facts are stored in a local directory:
       ansible.builtin.include_role:
         name: network.reports.persist
       vars:
+        resources:
+          - "interfaces"
+          - "l2_interfaces"
         data_store:
           local: "~/data/network"
 ```
