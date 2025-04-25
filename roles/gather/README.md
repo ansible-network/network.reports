@@ -38,7 +38,7 @@ Below is an example playbook demonstrating how to use the `gather` role, where w
 ```
 
 Example Output
-When the playbook is executed successfully, the output will display the all_gathered_facts for the specified resources.
+When the playbook is executed successfully, the output will display the all_gathered_resources for the specified resources.
 
 ## License
 

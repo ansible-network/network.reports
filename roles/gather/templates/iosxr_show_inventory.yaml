@@ -1,0 +1,5 @@
+- name: "serial_number"
+  getval: "PID:\\s\\S+\\S\\s,\\sVID:\\sV01,\\sSN:\\s(?P<serial_num>\\S+)"
+  result:
+    hardware:
+      serial_number: "{{ serial_num }}"

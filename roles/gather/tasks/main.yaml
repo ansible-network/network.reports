@@ -8,23 +8,44 @@
 - name: Include system resouces tasks
   ansible.builtin.include_tasks: system_resources.yaml
 
-- name: Add system resources to all_gathered_facts
+- name: Add system resources to all_gathered_resources
   ansible.builtin.set_fact:
-    all_gathered_facts: "{{ all_gathered_facts | combine(system_resources) }}"
+    all_gathered_resources: "{{ all_gathered_resources | combine(system_resources) }}"
 
-- name: Add ansible_network_os to all_gathered_facts
+- name: Add ansible_network_os to all_gathered_resources
   ansible.builtin.set_fact:
-    all_gathered_facts: "{{ all_gathered_facts | combine({'ansible_network_os': ansible_network_os}) }}"
+    all_gathered_resources: "{{ all_gathered_resources | combine({'ansible_network_os': ansible_network_os}) }}"
 
 - name: Debug combined facts
   ansible.builtin.debug:
-    var: all_gathered_facts
+    var: all_gathered_resources
 
 - name: Display gathered facts as JSON
   ansible.builtin.debug:
-    msg: "{{ all_gathered_facts | to_json }}"
+    msg: "{{ all_gathered_resources | to_json }}"
 
+# Display all gathered facts in XML format
+- name: Ensure dicttoxml is installed on the control node
+  ansible.builtin.pip:
+    name: dicttoxml
+    state: present
+  delegate_to: localhost
+  run_once: true
+  become: no 
+
+- name: Convert gathered facts to XML
+  ansible.builtin.command: 
+    cmd: python -c "import sys, json, dicttoxml; print(dicttoxml.dicttoxml(json.load(sys.stdin), custom_root='facts').decode())"
+  args:
+    stdin: "{{ all_gathered_resources | to_json }}" 
+  register: xml_output
+  changed_when: false 
+  check_mode: no   
+  delegate_to: localhost 
+  run_once: true         
 # Display all gathered facts in XML format
 - name: Display gathered facts as XML
   ansible.builtin.debug:
-    msg: "{{ all_gathered_facts | to_nice_yaml }}"
+    msg: "{{ xml_output.stdout }}"
+  run_once: true 
+

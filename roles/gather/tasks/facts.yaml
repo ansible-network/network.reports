@@ -8,8 +8,8 @@
 
 - name: Append resource facts to a global dictionary
   ansible.builtin.set_fact:
-    all_gathered_facts: >-
-      {{ all_gathered_facts | default({}) | combine({ res: gather_result.gathered }) }}
+    all_gathered_resources: >-
+      {{ all_gathered_resources | default({}) | combine({ res: gather_result.gathered }) }}
 
 - name: Display resource facts
   ansible.builtin.debug:

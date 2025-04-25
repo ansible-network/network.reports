@@ -26,6 +26,20 @@
       name: ansible.netcommon.native
     set_fact: licence_data
 
+- name: parse show inventory
+  ansible.utils.cli_parse:
+    command: "show inventory"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: show_inventory
+
 - name: Combine all data into system_resources
   ansible.builtin.set_fact:
-    system_resources: "{{ version_data | combine(memory_resources, recursive=True) | combine(hostname_resources, recursive=True) | combine(licence_data, recursive=True) }}"
+    system_resources: >-
+      {{
+        version_data
+        | combine(memory_resources, recursive=True)
+        | combine(hostname_resources, recursive=True)
+        | combine(licence_data, recursive=True)
+        | combine(show_inventory, recursive=True)
+      }}

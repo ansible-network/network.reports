@@ -35,7 +35,7 @@
 
 - name: Add gathered system data structure under 'device_info' key
   ansible.builtin.set_fact:
-    persist_result: "{{ persist_result | default([]) + [ {'device_info': gathered_system_data | default({}) } ] }}"
+    persist_result: "{{ [ {'all_gathered_resources': persist_result | default({}) } ] + [ {'device_info': gathered_system_data | default({}) } ] }}"
 
 - name: write to file
   ansible.builtin.include_tasks: write_to_file.yaml

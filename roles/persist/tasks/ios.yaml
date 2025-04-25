@@ -19,6 +19,13 @@
       name: ansible.netcommon.native
     set_fact: license_data
 
+- name: Parse Memory
+  ansible.utils.cli_parse:
+    command: "show memory summary"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: memory_resources
+
 # Combine all into one system_resources
 - name: Combine all resources into system_resources
   ansible.builtin.set_fact:
@@ -27,8 +34,9 @@
         version_data
         | combine(hostname_resources, recursive=True)
         | combine(license_data, recursive=True)
+        | combine(memory_resources, recursive=True)
       }}
 
 - name: Append to all results
   ansible.builtin.set_fact:
-    persist_result: "{{ persist_result | default([]) | list + [result] }}"
+    gathered_system_data: "{{ gathered_system_data | default([]) | list + [result] }}"
