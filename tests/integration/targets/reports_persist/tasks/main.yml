@@ -13,32 +13,21 @@
         test_data_store:
           local: "~/test_backup"
 
-    - name: Perform gather operation for network resources
-      block:
-        - name: Run network.reports.gather role to collect interface information
-          ansible.builtin.include_role:
-            name: network.reports.gather
-          vars:
-            resources:
-              - "interfaces"
-              - "l2_interfaces"
-              - "l3_interfaces"
-              - "ospf_interfaces"
-              - "ospfv2"
-              - "ospfv3"
-              - "bgp_global"
-              - "bgp_address_family"
 
     - name: Run network.reports validated content with persist operation
       ansible.builtin.include_role:
         name: network.reports.persist
       vars:
+        resources:
+          - "interfaces"
         data_store: "{{ test_data_store }}"
 
     - name: Run network.reports validated content with persist operation again
       ansible.builtin.include_role:
         name: network.reports.persist
       vars:
+        resources: 
+          - "interfaces"
         data_store: "{{ test_data_store }}"
       register: reports_result
 
@@ -51,6 +40,8 @@
       ansible.builtin.include_role:
         name: network.reports.deploy
       vars:
+        resources:
+          - "interfaces"
         data_store: "{{ test_data_store }}"
       register: deploy_result
 

@@ -8,44 +8,60 @@
 - name: Include system resouces tasks
   ansible.builtin.include_tasks: system_resources.yaml
 
-- name: Add system resources to all_gathered_resources
+- name: Add gathered system data structure under 'device_info' key
   ansible.builtin.set_fact:
-    all_gathered_resources: "{{ all_gathered_resources | combine(system_resources) }}"
+    gather_result: >-
+      {{
+        {'all_gathered_resources': all_gathered_resources | default({})}
+        | combine(
+            {'device_info': (system_resources | default({})) | combine({'ansible_network_os': ansible_network_os | default('')})}
+          )
+      }}
 
-- name: Add ansible_network_os to all_gathered_resources
-  ansible.builtin.set_fact:
-    all_gathered_resources: "{{ all_gathered_resources | combine({'ansible_network_os': ansible_network_os}) }}"
-
-- name: Debug combined facts
+- name: Display gathered facts as pretty JSON
   ansible.builtin.debug:
-    var: all_gathered_resources
+    msg: "{{ gather_result | to_nice_json }}"
+  when: format is defined and format == 'json'
+  run_once: true
 
-- name: Display gathered facts as JSON
+- name: Display gathered facts as pretty YAML
   ansible.builtin.debug:
-    msg: "{{ all_gathered_resources | to_json }}"
+    msg: "{{ gather_result | to_nice_yaml }}"
+  when: format is defined and format == 'yaml' or format is not defined
+  run_once: true
 
-# Display all gathered facts in XML format
-- name: Ensure dicttoxml is installed on the control node
+- name: Ensure dicttoxml is installed on the control node for XML output
   ansible.builtin.pip:
     name: dicttoxml
     state: present
   delegate_to: localhost
   run_once: true
   become: no 
+  when: format is defined and format == 'xml'
 
-- name: Convert gathered facts to XML
-  ansible.builtin.command: 
-    cmd: python -c "import sys, json, dicttoxml; print(dicttoxml.dicttoxml(json.load(sys.stdin), custom_root='facts').decode())"
+- name: Convert gathered facts to pretty XML format
+  ansible.builtin.command:
+    cmd: >
+      python -c "import sys, json, dicttoxml; from xml.dom import minidom;
+      xml_bytes = dicttoxml.dicttoxml(json.load(sys.stdin), custom_root='facts');
+      dom = minidom.parseString(xml_bytes);
+      pretty_xml = dom.toprettyxml(indent='  ');
+      print(pretty_xml)"
   args:
-    stdin: "{{ all_gathered_resources | to_json }}" 
-  register: xml_output
-  changed_when: false 
-  check_mode: no   
+    stdin: "{{ gather_result | to_json }}" 
+  register: xml_conversion_output
+  changed_when: false
+  check_mode: no
   delegate_to: localhost 
   run_once: true         
-# Display all gathered facts in XML format
-- name: Display gathered facts as XML
-  ansible.builtin.debug:
-    msg: "{{ xml_output.stdout }}"
-  run_once: true 
+  when: format is defined and format == 'xml'
 
+- name: Display gathered facts as pretty XML
+  ansible.builtin.debug:
+    msg: "{{ xml_conversion_output.stdout }}"
+  when:
+    - output_format is defined
+    - output_format == 'xml'
+    - xml_conversion_output is defined
+    - not xml_conversion_output.failed
+  run_once: true

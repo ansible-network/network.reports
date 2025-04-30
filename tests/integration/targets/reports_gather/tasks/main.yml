@@ -12,13 +12,13 @@
         resources:
           - "bgp_global"
           - "bgp_address_family"
-      register: gather_result
+          - "ospf_interfaces"
+          - "ospfv2"
 
     - name: Determine network OS
       ansible.builtin.set_fact:
-        detected_os: "{{ all_gathered_facts.ansible_network_os | default('unknown') }}"
+        detected_os: "{{ ansible_network_os | default('unknown') }}"
 
-    
     - name: Include Cisco NXOS verification
       ansible.builtin.include_tasks: cisco_nxos_verify.yml
       when: "'cisco.nxos.nxos' in detected_os"
@@ -30,87 +30,64 @@
     - name: Include Cisco IOSXR verification
       ansible.builtin.include_tasks: cisco_iosxr_verify.yml
       when: "'cisco.iosxr.iosxr' in detected_os"
+    
+    - name: Include Cisco IOS verification
+      ansible.builtin.include_tasks: cisco_ios_verify.yml
+      when: "'cisco.ios.ios' in detected_os"
 
-    - name: Try to display sorted all_gathered_facts (Readable JSON)
-      ansible.builtin.debug:
-        msg: "Sorted all_gathered_facts: {{ all_gathered_facts | to_nice_json }}"
-      when: "'cisco.nxos.nxos' in detected_os"
-  # Removed default filter - if all_gathered_facts is undefined, task should ideally skip or fail earlier
-    - name: Try to display sorted nxos_verification
-      ansible.builtin.debug:
-        msg: "Sorted nxos_verification: {{ nxos_verification | to_nice_json | default('VARIABLE_IS_UNDEFINED') }}"
+    - name: Set default empty list for excluded keys
+      set_fact:
+        exclude_keys: []
+
+    - name: Define NX-OS specific excluded keys (overrides default if condition met)
+      set_fact:
+        exclude_keys:
+          - memory
+          - nxos_compile_time
+          - processes
+          - uptime
       when: "'cisco.nxos.nxos' in detected_os"
 
+    - name: Define IOS/IOS/EOS XE specific excluded keys
+      set_fact:
+        exclude_keys:
+          - memory
+          - last_reload_reason
+          - reload_reason
+          - build_info.compiled_date
+          - uptime
+          - processes 
+         
+      when: ansible_network_os in ['cisco.ios.ios', 'cisco.iosxe.iosxe', 'arista.eos.eos']
+
+    - name: Filter device_info and sort
+      ansible.builtin.set_fact:
+        filtered_device_info: "{{ gather_result.device_info | dict2items | rejectattr('key', 'in', exclude_keys) | list | sort(attribute='key') | items2dict }}"
+        
+    - name: Sort all_gathered_info
+      ansible.builtin.set_fact:
+        filtered_all_gathered_resources: "{{ dict(gather_result.all_gathered_resources | dictsort) }}"
    
+    - name: Combine all gathered information with resources first
+      ansible.builtin.set_fact:
+        combined_gathered_info: "{{ filtered_all_gathered_resources | combine(filtered_device_info) }}"
 
-    # Final assertion with clear pass/fail messages
-    - name: Assert that facts match when compared field-by-field as strings
-      ansible.builtin.assert:
+    - name: Sort all_gathered_info
+      ansible.builtin.set_fact:
+        combined_gathered_info: "{{ dict(combined_gathered_info | dictsort) }}"
+
+    - name: Sort all_gathered_info
+      ansible.builtin.set_fact:
+        expected_facts: "{{ dict(expected_facts | dictsort) }}"
+
+
+    - name: Assert that facts match after filtering
+      assert:
         that:
-          # --- Top Level Strings (or treated as strings) ---
-          - nxos_verification.ansible_network_os | string == (all_gathered_facts.ansible_network_os | default('unknown') | string)
-          - nxos_verification.bgp_address_family.as_number | string == (all_gathered_facts.bgp_address_family.as_number | default('unknown') | string) 
-          - nxos_verification.bgp_global.as_number | string == (all_gathered_facts.bgp_global.as_number | default('unknown') | string)             
-          - nxos_verification.bgp_global.router_id | string == (all_gathered_facts.bgp_global.router_id | default('unknown') | string)             
-          - nxos_verification.device_name | string == (all_gathered_facts.device_name | default('unknown') | string)
-          - nxos_verification.hardware.model | string == (all_gathered_facts.hardware.model | default('unknown') | string)                         
-          - nxos_verification.hardware.serial_number | string == (all_gathered_facts.hardware.serial_number | default('unknown') | string)         
-          - nxos_verification.last_reset_reason | string == (all_gathered_facts.last_reset_reason | default('unknown') | string)
-          - nxos_verification.license.description | string == (all_gathered_facts.license.description | default('unknown') | string)                 
-          - nxos_verification.license.enforcement_type | string == (all_gathered_facts.license.enforcement_type | default('unknown') | string)       
-          - nxos_verification.license.license_type | string == (all_gathered_facts.license.license_type | default('unknown') | string)            
-          - nxos_verification.license.name | string == (all_gathered_facts.license.name | default('unknown') | string)                              
-          - nxos_verification.license.status | string == (all_gathered_facts.license.status | default('unknown') | string)                          
-          - nxos_verification.nxos_compile_time | string == (all_gathered_facts.nxos_compile_time | default('unknown') | string)
-          - nxos_verification.nxos_image_file | string == (all_gathered_facts.nxos_image_file | default('unknown') | string)
-          - nxos_verification.os_type | string == (all_gathered_facts.os_type | default('unknown') | string)
-          - nxos_verification.processor.type | string == (all_gathered_facts.processor.type | default('unknown') | string)                         
-          - nxos_verification.release_type | string == (all_gathered_facts.release_type | default('unknown') | string)
-          - nxos_verification.version | string == (all_gathered_facts.version | default('unknown') | string)
+          - combined_gathered_info == expected_facts
+        fail_msg: "Facts mismatch after ignoring dynamic keys!"
+        success_msg: "Facts match perfectly after ignoring dynamic keys!"
 
-       
-          - all_gathered_facts.bgp_global.timers.bgp is defined
-          - nxos_verification.bgp_global.timers.bgp.holdtime | string == (all_gathered_facts.bgp_global.timers.bgp.holdtime | default(0, boolean=True) | string)
-          - nxos_verification.bgp_global.timers.bgp.keepalive | string == (all_gathered_facts.bgp_global.timers.bgp.keepalive | default(0, boolean=True) | string)
-
-          - all_gathered_facts.bootflash is defined
-          - nxos_verification.bootflash | string == (all_gathered_facts.bootflash | default(0, boolean=True) | string)
-
-          - all_gathered_facts.license is defined
-          - nxos_verification.license.count | string == (all_gathered_facts.license.count | default(0, boolean=True) | string)
-          - nxos_verification.license.version | string == (all_gathered_facts.license.version | default(0.0, boolean=True) | string)
-
-          - all_gathered_facts.memory is defined
-          - nxos_verification.memory.free_mb | string == (all_gathered_facts.memory.free_mb | default(0.0, boolean=True) | string)
-          - nxos_verification.memory.total_mb | string == (all_gathered_facts.memory.total_mb | default(0.0, boolean=True) | string)
-          - nxos_verification.memory.used_mb | string == (all_gathered_facts.memory.used_mb | default(0.0, boolean=True) | string)
-
-          - all_gathered_facts.processes is defined
-          - nxos_verification.processes.running | string == (all_gathered_facts.processes.running | default(0, boolean=True) | string)
-          - nxos_verification.processes.total | string == (all_gathered_facts.processes.total | default(0, boolean=True) | string)
-
-          - all_gathered_facts.processor is defined
-          - nxos_verification.processor.memory | string == (all_gathered_facts.processor.memory | default(0, boolean=True) | string)
-
-          - all_gathered_facts.uptime is defined
-          - nxos_verification.uptime.days | string == (all_gathered_facts.uptime.days | default(0, boolean=True) | string)
-          - nxos_verification.uptime.hours | string == (all_gathered_facts.uptime.hours | default(0, boolean=True) | string)
-          - nxos_verification.uptime.minutes | string == (all_gathered_facts.uptime.minutes | default(0, boolean=True) | string)
-          - nxos_verification.uptime.seconds | string == (all_gathered_facts.uptime.seconds | default(0, boolean=True) | string)
-
-     
-          - all_gathered_facts.bgp_address_family is defined
-          - nxos_verification.bgp_address_family.address_family == (all_gathered_facts.bgp_address_family.address_family | default([]))
-
-          - all_gathered_facts.bgp_global is defined
-          - nxos_verification.bgp_global.neighbors == (all_gathered_facts.bgp_global.neighbors | default([]))
-
-          
-
-        fail_msg: "Verification field-by-field comparison (as strings) failed!"
-        success_msg: "Verification field-by-field comparison (as strings) successful."
-      when: nxos_verification is defined # Keep the when condition
-   
 - name: Debug
   ansible.builtin.debug:
     msg: "END network.reports gather operation integration tests on connection={{ ansible_connection }}"
