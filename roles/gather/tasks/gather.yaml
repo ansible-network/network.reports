@@ -21,9 +21,9 @@
     gather_network_resources: "{{ gather_network_resources_list['modules'] | ansible.utils.param_list_compare(resources) }}"
   when: resources is defined
 
-- name: Initialize all_gathered_facts as an empty dictionary
+- name: Initialize all_gathered_resources as an empty dictionary
   ansible.builtin.set_fact:
-    all_gathered_facts: {}
+    all_gathered_resources: {}
 
 - name: Include build tasks
   ansible.builtin.include_tasks: facts.yaml
@@ -33,4 +33,4 @@
 
 - name: Display resource facts
   ansible.builtin.debug:
-    msg: "{{ all_gathered_facts }}"
+    msg: "{{ all_gathered_resources }}"

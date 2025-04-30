@@ -1,79 +1,183 @@
----
-# Cisco NXOS verification template
-
-- name: Set Cisco NXOS verification facts
+- name: Set Cisco NXOS verification facts (Matching structure and types)
   ansible.builtin.set_fact:
-    nxos_verification:
-      # Basic system information
-      system:
-        hostname: "{{ all_gathered_facts.device_name }}"
-        version: "{{ all_gathered_facts.version }}"
-        model: "{{ all_gathered_facts.hardware.model }}"
-        serial: "{{ all_gathered_facts.hardware.serial_number }}"
-        os_type: "{{ all_gathered_facts.os_type }}"
-        release_type: "{{ all_gathered_facts.release_type }}"
-        image_file: "{{ all_gathered_facts.nxos_image_file }}"
-        uptime:
-          days: "{{ all_gathered_facts.uptime.days }}"
-          hours: "{{ all_gathered_facts.uptime.hours }}"
-          minutes: "{{ all_gathered_facts.uptime.minutes }}"
-
-      # Interface information
-      interfaces:
-        count: "{{ all_gathered_facts.interfaces | length | int }}"
-        # Filter only interfaces that have enabled attribute set to true
-        enabled: "{{ all_gathered_facts.interfaces | selectattr('enabled', 'defined') | selectattr('enabled', 'eq', true) | list | length | int }}"
-        l3_interfaces: "{{ all_gathered_facts.l3_interfaces | length | int }}"
-        l2_interfaces: "{{ all_gathered_facts.l2_interfaces | length | int }}"
-        ospf_interfaces: "{{ all_gathered_facts.ospf_interfaces | length | int }}"
-
-      # Routing protocols
-      routing:
-        bgp:
-          configured: "{{ all_gathered_facts.bgp_global is defined }}"
-          as_number: "{{ all_gathered_facts.bgp_global.as_number | default('not configured') }}"
-          neighbors: "{{ all_gathered_facts.bgp_global.neighbors | default([]) | length | int }}"
-          address_families: "{{ all_gathered_facts.bgp_address_family.address_family | default([]) | length | int }}"
-        ospfv2:
-          configured: "{{ all_gathered_facts.ospfv2 is defined and all_gathered_facts.ospfv2.processes is defined }}"
-          process_count: "{{ all_gathered_facts.ospfv2.processes | default([]) | length | int }}"
-        ospfv3:
-          configured: "{{ all_gathered_facts.ospfv3 is defined and all_gathered_facts.ospfv3.processes is defined }}"
-          process_count: "{{ all_gathered_facts.ospfv3.processes | default([]) | length | int }}"
-
-      # System resources
-      resources:
-        memory_total: "{{ all_gathered_facts.memory.total_mb | default('unknown') }} MB"
-        memory_free: "{{ all_gathered_facts.memory.free_mb | default('unknown') }} MB"
-        memory_used: "{{ all_gathered_facts.memory.used_mb | default('unknown') }} MB"
-        bootflash: "{{ all_gathered_facts.bootflash | default('unknown') }} KB"
-        processor_type: "{{ all_gathered_facts.processor.type | default('unknown') }}"
-        processor_memory: "{{ all_gathered_facts.processor.memory | default('unknown') }} KB"
-
-      # Licensing
-      licensing:
-        status: "{{ all_gathered_facts.license.status | default('unknown') }}"
-        name: "{{ all_gathered_facts.license.name | default('unknown') }}"
-        type: "{{ all_gathered_facts.license.license_type | default('unknown') }}"
-        description: "{{ all_gathered_facts.license.description | default('unknown') }}"
-  when: all_gathered_facts.ansible_network_os is defined and 'cisco.nxos.nxos' in all_gathered_facts.ansible_network_os
-
-# Add NXOS specific assertions
-- name: Verify Cisco NXOS specific data
-  ansible.builtin.assert:
-    that:
-      - nxos_verification.system.hostname is defined
-      - nxos_verification.system.version is defined
-      - nxos_verification.system.model is defined
-      - nxos_verification.interfaces.count | int > 0
-      - nxos_verification.routing is defined
-    fail_msg: "Cisco NXOS specific data validation failed"
-    success_msg: "Cisco NXOS specific data validated successfully"
-  when: nxos_verification is defined
-
-- name: Display Cisco NXOS verification results
-  ansible.builtin.debug:
-    var: nxos_verification
-  when:
-    - nxos_verification is defined
-    - not verification_silent | default(false)
+    expected_facts:
+      ansible_network_os: "cisco.nxos.nxos"
+      ospf_interfaces:
+        - name: Ethernet1/1
+        - name: Ethernet1/2
+        - name: Ethernet1/3
+        - name: Ethernet1/4
+        - name: Ethernet1/5
+        - name: Ethernet1/6
+        - name: Ethernet1/7
+        - name: Ethernet1/8
+        - name: Ethernet1/9
+        - name: Ethernet1/10
+        - name: Ethernet1/11
+        - name: Ethernet1/12
+        - name: Ethernet1/13
+        - name: Ethernet1/14
+        - name: Ethernet1/15
+        - name: Ethernet1/16
+        - name: Ethernet1/17
+        - name: Ethernet1/18
+        - name: Ethernet1/19
+        - name: Ethernet1/20
+        - name: Ethernet1/21
+        - name: Ethernet1/22
+        - name: Ethernet1/23
+        - name: Ethernet1/24
+        - name: Ethernet1/25
+        - name: Ethernet1/26
+        - name: Ethernet1/27
+        - name: Ethernet1/28
+        - name: Ethernet1/29
+        - name: Ethernet1/30
+        - name: Ethernet1/31
+        - name: Ethernet1/32
+        - name: Ethernet1/33
+        - name: Ethernet1/34
+        - name: Ethernet1/35
+        - name: Ethernet1/36
+        - name: Ethernet1/37
+        - name: Ethernet1/38
+        - name: Ethernet1/39
+        - name: Ethernet1/40
+        - name: Ethernet1/41
+        - name: Ethernet1/42
+        - name: Ethernet1/43
+        - name: Ethernet1/44
+        - name: Ethernet1/45
+        - name: Ethernet1/46
+        - name: Ethernet1/47
+        - name: Ethernet1/48
+        - name: Ethernet1/49
+        - name: Ethernet1/50
+        - name: Ethernet1/51
+        - name: Ethernet1/52
+        - name: Ethernet1/53
+        - name: Ethernet1/54
+        - name: Ethernet1/55
+        - name: Ethernet1/56
+        - name: Ethernet1/57
+        - name: Ethernet1/58
+        - name: Ethernet1/59
+        - name: Ethernet1/60
+        - name: Ethernet1/61
+        - name: Ethernet1/62
+        - name: Ethernet1/63
+        - name: Ethernet1/64
+        - name: Tunnel1
+        - name: Vlan1
+        - address_family:
+          - afi: ipv4
+            processes:
+              - area:
+                  area_id: 0.0.0.0
+                process_id: '10'
+          name: Vlan10
+        - name: mgmt0
+        - name: port-channel1
+        - name: port-channel10
+        - name: port-channel111
+      ospfv2:
+        processes:
+          - process_id: '100'
+            router_id: 203.0.113.20
+          - areas:
+              - area_id: 0.0.0.100
+                filter_list:
+                  - direction: out
+                    route_map: rmap_2
+                  - direction: in
+                    route_map: rmap_1
+                ranges:
+                  - not_advertise: true
+                    prefix: 198.51.100.64/27
+                  - cost: 120
+                    prefix: 198.51.100.96/27
+              - area_id: 0.0.0.101
+                authentication:
+                  message_digest: true
+            process_id: '102'
+            redistribute:
+              - protocol: direct
+                route_map: ospf102-direct-connect
+              - id: '120'
+                protocol: eigrp
+                route_map: rmap_1
+            router_id: 198.51.100.1
+            vrfs:
+              - areas:
+                  - area_id: 0.0.0.102
+                    nssa:
+                      default_information_originate: true
+                      no_summary: true
+                  - area_id: 0.0.0.103
+                    nssa:
+                      no_summary: true
+                      translate:
+                        type7:
+                          always: true
+                redistribute:
+                  - protocol: static
+                    route_map: zone1-static-connect
+                router_id: 198.51.100.129
+                summary_address:
+                  - prefix: 198.51.100.128/27
+                    tag: 121
+                  - prefix: 198.51.100.160/27
+                vrf: zone1
+              - auto_cost:
+                  reference_bandwidth: 45
+                  unit: Gbps
+                vrf: zone2
+      bgp_address_family:
+        address_family:
+          - afi: ipv4
+            networks:
+              - prefix: 10.0.0.0/24
+              - prefix: 172.16.0.0/16
+            safi: unicast
+          - afi: ipv6
+            networks:
+              - prefix: 2001:db8::/32
+              - prefix: 2001:db8:abcd::/48
+            safi: unicast
+        as_number: '65001'
+      bgp_global:
+        as_number: "65001"
+        neighbors:
+          - neighbor_address: "192.168.1.2"
+            remote_as: "65002"
+            update_source: "loopback0"
+          - neighbor_address: "192.168.2.1"
+            remote_as: "65002"
+          - neighbor_address: "2001:db8::2"
+            remote_as: "65003"
+        router_id: "1.1.1.1"
+        timers:
+          bgp:
+            holdtime: 90
+            keepalive: 30
+      bootflash: 4495360
+      device_name: "aayushNXOS"
+      hardware:
+        model: "Nexus9000 C9300v"
+        serial_number: "9GT0HF5KR3M"
+      last_reset_reason: "Unknown"
+      license:
+        count: 1
+        description: "LAN license for Nexus 9300-XF"
+        enforcement_type: "NOT ENFORCED"
+        license_type: "Generic"
+        name: "LAN_ENTERPRISE_SERVICES_PKG"
+        status: "IN USE"
+        version: 1.0
+      nxos_image_file: "bootflash:///nxos64-cs.10.4.2.F.bin"
+      os_type: "NX-OS"
+      processor:
+        memory: 8135696
+        type: "Intel(R) Xeon(R) Platinum 8275CL CPU @ 3.00GHz"
+      release_type: "Feature Release"
+      version: "10.4(2)"

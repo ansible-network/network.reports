@@ -35,7 +35,7 @@
 
 - name: Combine all data into system_resources
   ansible.builtin.set_fact:
-    system_resources: >-
+    result: >-
       {{
         version_data
         | combine(memory_resources, recursive=True)
@@ -43,3 +43,7 @@
         | combine(licence_data, recursive=True)
         | combine(show_inventory, recursive=True)
       }}
+
+- name: Append to all results
+  ansible.builtin.set_fact:
+    gathered_system_data: "{{ gathered_system_data | default([]) | list + [result] }}"

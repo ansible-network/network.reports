@@ -29,10 +29,14 @@
 # Combine all into one system_resources
 - name: Combine all resources into system_resources
   ansible.builtin.set_fact:
-    system_resources: >-
+    result: >-
       {{
         version_data
         | combine(hostname_resources, recursive=True)
         | combine(license_data, recursive=True)
         | combine(memory_resources, recursive=True)
       }}
+
+- name: Append to all results
+  ansible.builtin.set_fact:
+    gathered_system_data: "{{ gathered_system_data | default([]) | list + [result] }}"

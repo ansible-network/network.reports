@@ -1,0 +1,80 @@
+- name: "smart_licensing"
+  getval: "^Smart Licensing is (?P<smart_licensing>\\S+)"
+  result:
+    smart_licensing.status: "{{ smart_licensing }}"
+
+- name: "conversion_enabled"
+  getval: "^\\s+Automatic Conversion Enabled: (?P<convert>\\S+)"
+  result:
+    license_conversion.enabled: "{{ convert }}"
+
+- name: "utility_status"
+  getval: "^\\s+Utility:\\s*\\n\\s+Status: (?P<util>\\S+)"
+  result:
+    utility.status: "{{ util }}"
+
+- name: "policy_status"
+  getval: "^\\s+Smart Licensing Using Policy:\\s*\\n\\s+Status: (?P<policy>\\S+)"
+  result:
+    policy.status: "{{ policy }}"
+
+- name: "smart_account"
+  getval: "^\\s+Smart Account: (?P<sa>.+)"
+  result:
+    account.smart_account: "{{ sa }}"
+
+- name: "virtual_account"
+  getval: "^\\s+Virtual Account: (?P<va>.+)"
+  result:
+    account.virtual_account: "{{ va }}"
+
+- name: "hostname_privacy"
+  getval: "^\\s+Smart Licensing hostname privacy: (?P<shp>\\S+)"
+  result:
+    data_privacy.hostname_privacy: "{{ shp }}"
+
+- name: "version_privacy"
+  getval: "^\\s+Version privacy: (?P<vp>\\S+)"
+  result:
+    data_privacy.version_privacy: "{{ vp }}"
+
+- name: "transport_type"
+  getval: "^\\s+Type: (?P<transport>\\S+)"
+  result:
+    transport.type: "{{ transport }}"
+
+- name: "vrf"
+  getval: "^\\s+VRF: (?P<vrf>.+)"
+  result:
+    transport.vrf: "{{ vrf }}"
+
+- name: "custom_id"
+  getval: "^\\s+Custom Id: (?P<cid>.+)"
+  result:
+    miscellaneous.custom_id: "{{ cid }}"
+
+- name: "policy_in_use"
+  getval: "^\\s+Policy in use: (?P<piu>.+)"
+  result:
+    policy.in_use: "{{ piu }}"
+
+- name: "ack_required"
+  getval: "^\\s+Reporting ACK required: (?P<ack>.+)"
+  result:
+    policy.ack_required: "{{ ack }}"
+
+- name: "product_info"
+  getval: "^UDI: PID:(?P<pid>[^,]+),SN:(?P<sn>.+)"
+  result:
+    product_info.pid: "{{ pid }}"
+    product_info.serial: "{{ sn }}"
+
+- name: "agent_version"
+  getval: "^Smart Agent for Licensing: (?P<agent>.+)"
+  result:
+    agent.version: "{{ agent }}"
+
+- name: "overall_license_status"
+  getval: "^\\s+Status: (?P<lic_status>NOT INSTALLED|INSTALLED)"
+  result:
+    license_overall.status: "{{ lic_status }}"

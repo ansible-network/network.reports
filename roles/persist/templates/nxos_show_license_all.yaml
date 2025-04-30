@@ -1,0 +1,41 @@
+- name: "license_name"
+  getval: "^\\((?P<license_name>[^)]+)\\):$"
+  result:
+    license:
+      name: "{{ license_name }}"
+
+- name: "license_description"
+  getval: "^\\s+Description: (?P<desc>.+)"
+  result:
+    license:
+      description: "{{ desc }}"
+
+- name: "license_count"
+  getval: "^\\s+Count: (?P<count>\\d+)"
+  result:
+    license:
+      count: "{{ count | int }}"
+
+- name: "license_version"
+  getval: "^\\s+Version: (?P<ver>.+)"
+  result:
+    license:
+      version: "{{ ver }}"
+
+- name: "license_status"
+  getval: "^\\s+Status: (?P<status>.+)"
+  result:
+    license:
+      status: "{{ status }}"
+
+- name: "license_enforcement"
+  getval: "^\\s+Enforcement Type: (?P<enforce>.+)"
+  result:
+    license:
+      enforcement_type: "{{ enforce }}"
+
+- name: "license_type"
+  getval: "^\\s+License Type: (?P<lictype>.+)"
+  result:
+    license:
+      license_type: "{{ lictype }}"

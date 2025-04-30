@@ -1,10 +1,8 @@
 ---
 - name: "ios_xe_version"
-  getval: "Cisco\\s(?P<os_type>\\w+\\s\\w+)\\sSoftware,\\sVersion\\s(?P<version>\\S+)"
+  getval: "Cisco\\sIOS\\sXE\\sSoftware,\\sVersion\\s(?P<version>\\S+)"
   result:
     version: "{{ version }}"
-    os_type: "{{ os_type }}"
-
 - name: "ios_version"
   getval: "Cisco\\sIOS\\sSoftware\\s\\[IOSXE\\],\\s(?P<product>.*),\\sVersion\\s(?P<detailed_version>[^,]+)"
   result:

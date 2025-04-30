@@ -1,11 +1,4 @@
 ---
-- name: "model_type"
-  getval: "^(?P<os>\\w+)$"
-  result:
-    os_type: "{{ os }}"
-
-    hardware:
-      model: "{{ os }}"
 - name: "eos_hardware_version"
   getval: "^Hardware\\sversion:\\s+(?P<hardware_version>.*)$"
   result:

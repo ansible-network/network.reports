@@ -1,4 +1,18 @@
 ---
+- name: Get the supported resource modules
+  ansible.netcommon.network_resource:
+    os_name: "{{ ansible_network_os }}"
+  register: persist_network_resources_list
+
+- name: Set default resources
+  ansible.builtin.set_fact:
+    persist_resources: "{{ persist_network_resources_list['modules'] }}"
+  when: persist_resources is undefined
+
+- name: Set Network resources
+  ansible.builtin.set_fact:
+    persist_network_resources: "{{ persist_network_resources_list['modules'] | ansible.utils.param_list_compare(resources) }}"
+
 - name: Resolve inventory
   ansible.builtin.include_tasks: manage_inventory.yaml
 
@@ -6,8 +20,80 @@
   ansible.builtin.include_tasks: retrieve.yaml
   when: data_store['scm'] is defined
 
+- name: Ensure persist_result is initialized as an empty list
+  ansible.builtin.set_fact:
+    persist_result: {}
+
 - name: Include facts tasks
   ansible.builtin.include_tasks: facts.yaml
+  loop: "{{ persist_network_resources['actionable'] }}"
+  loop_control:
+    loop_var: res
+
+- name: Include System resources
+  ansible.builtin.include_tasks: system_resources.yaml
+
+- name: Add gathered system data structure under 'device_info' key
+  ansible.builtin.set_fact:
+    persist_result:
+      all_gathered_resources: >-  # Set the 'all_gathered_resources' key within 'persist_result'
+        {{
+          (persist_result | default({}))
+          | combine(
+              {'device_info': gathered_system_data | default({})}
+            )
+        }}
+- name: Store persist_result as pretty JSON
+  ansible.builtin.set_fact:
+    persist_result_output: "{{ persist_result | to_nice_json }}"
+  when: format is defined and format == 'json'
+  run_once: true
+
+- name: Store persist_result as pretty JSON
+  ansible.builtin.set_fact:
+    persist_result_output: "{{ persist_result | to_nice_yaml }}"
+  when: format is defined and format == 'yaml' or format is not defined
+  run_once: true
+
+- name: Ensure dicttoxml is installed on the control node for XML output
+  ansible.builtin.pip:
+    name: dicttoxml
+    state: present
+  delegate_to: localhost
+  run_once: true
+  when: format is defined and format == 'xml'
+
+
+- name: Convert gathered facts to pretty XML format
+  become: false
+  ansible.builtin.command:
+    cmd: >
+      python -c "import sys, json, dicttoxml; from xml.dom import minidom;
+      xml_bytes = dicttoxml.dicttoxml(json.load(sys.stdin), custom_root='facts');
+      dom = minidom.parseString(xml_bytes);
+      pretty_xml = dom.toprettyxml(indent='  ');
+      print(pretty_xml)"
+  
+  args:
+    stdin: "{{ persist_result | to_json }}" 
+  register: xml_conversion_output
+  changed_when: false
+  check_mode: no
+  run_once: true         
+  when: format is defined and format == 'xml'
+
+- name: Display gathered facts as pretty XML
+  ansible.builtin.set_fact:
+    persist_result_output: "{{ xml_conversion_output.stdout }}"
+  when:
+    - format is defined
+    - format == 'xml'
+    - xml_conversion_output is defined
+    - not xml_conversion_output.failed
+  run_once: true
+
+- name: write to file
+  ansible.builtin.include_tasks: write_to_file.yaml
 
 - name: Include publish with tag tasks
   ansible.builtin.include_tasks: publish_tag.yaml

@@ -1,40 +1,222 @@
----
-# Cisco IOS verification template
-
-- name: Set Cisco IOS verification facts
+- name: Set Cisco IOSXR verification facts (Matching structure and types)
   ansible.builtin.set_fact:
-    ios_verification:
-      # Basic system information
-      system:
-        hostname: "{{ all_gathered_facts.device_name }}"
-        version: "{{ all_gathered_facts.version }}"
-        model: "{{ all_gathered_facts.hardware.model }}"
-        serial: "{{ all_gathered_facts.hardware.serial_number }}"
-
-      # Interface information
-      interfaces:
-        count: "{{ all_gathered_facts.interfaces | length }}"
-        enabled: "{{ all_gathered_facts.interfaces | selectattr('enabled', 'eq', true) | list | length }}"
-        l3_interfaces: "{{ all_gathered_facts.l3_interfaces | length }}"
-
-      # Routing protocols
-      routing:
+    expected_facts:
+      account.smart_account: "<none>"
+      account.virtual_account: "<none>"
+      agent.version: 5.9.18_rel/75
+      ansible_network_os: cisco.ios.ios
+      ospf_interfaces:
+        - name: Loopback888
+        - name: Loopback999
+        - name: GigabitEthernet1
+        - address_family:
+          - afi: ipv4
+            dead_interval:
+              time: 5
+            network:
+              broadcast: true
+            resync_timeout: 10
+          name: GigabitEthernet2
+        - name: GigabitEthernet3
+        - name: GigabitEthernet4
+      ospfv2:
+        processes:
+          - areas:
+              - area_id: '10'
+                capability: true
+            auto_cost:
+              reference_bandwidth: 4
+              set: true
+            domain_id:
+              ip_address:
+                address: 192.0.3.1
+            max_metric:
+              on_startup:
+                time: 100
+              router_lsa: true
+            network:
+              - address: 198.51.100.0
+                area: '5'
+                wildcard_bits: 0.0.0.255
+            process_id: 200
+            router_id: 1.1.1.1
+            vrf: blue
+      bgp_address_family:
+        as_number: '65000'
+      bgp_global:
+        as_number: '65000'
+        auto_summary: true
         bgp:
-          configured: "{{ all_gathered_facts.bgp_global is defined }}"
-          as_number: "{{ all_gathered_facts.bgp_global.as_number | default('not configured') }}"
-          neighbors: "{{ all_gathered_facts.bgp_global.neighbors | default([]) | length }}"
-        ospf:
-          configured: "{{ all_gathered_facts.ospfv2 is defined and all_gathered_facts.ospfv2.processes is defined }}"
-          process_count: "{{ all_gathered_facts.ospfv2.processes | default([]) | length }}"
-
-      # Memory and licensing
-      resources:
-        memory: "{{ all_gathered_facts.memory.total_mb | default('unknown') }} MB"
-        license_type: "{{ all_gathered_facts.license.type | default('unknown') }}"
-  when: all_gathered_facts.ansible_network_os is defined and 'cisco.ios.ios' in all_gathered_facts.ansible_network_os
-
-- name: Display Cisco IOS verification results
-  ansible.builtin.debug:
-    var: ios_verification
-  when:
-    - ios_verification is defined
+          advertise_best_external: true
+          aggregate_timer: 0
+          always_compare_med: true
+          asnotation: true
+          bestpath_options:
+            aigp: true
+            compare_routerid: true
+            med:
+              confed: true
+              missing_as_worst: true
+          confederation:
+            identifier: '22'
+          consistency_checker:
+            error_message:
+              interval: 10
+              set: true
+          dampening:
+            route_map: routeMap1Test
+          default:
+            ipv4_unicast: true
+            route_target:
+              filter: true
+          deterministic_med: true
+          graceful_restart:
+            restart_time: 2
+            stalepath_time: 22
+          graceful_shutdown:
+            community: '77'
+            local_preference: 230
+            vrfs:
+              time: 31
+          inject_maps:
+            - copy_attributes: true
+              exist_map_name: Testmap2
+              name: map1
+            - copy_attributes: true
+              exist_map_name: Testmap3
+              name: map2
+          listen:
+            limit: 200
+            range:
+              host_with_subnet: 192.0.2.0/24
+              peer_group: PaulNetworkGroup
+          log_neighbor_changes: true
+          maxas_limit: 2
+          maxcommunity_limit: 3
+          maxextcommunity_limit: 3
+          nexthop:
+            route_map: RouteMap1
+            trigger:
+              delay: 2
+          nopeerup_delay_options:
+            cold_boot: 2
+            nsf_switchover: 10
+            post_boot: 22
+            user_initiated: 22
+          recursion: true
+          redistribute_internal: true
+          refresh:
+            max_eor_time: 700
+            stalepath_time: 800
+          router_id:
+            vrf: true
+          scan_time: 22
+          slow_peer:
+            detection:
+              threshold: 345
+            split_update_group:
+              dynamic: true
+              permanent: true
+          sso: true
+          suppress_inactive: true
+          update_delay: 2
+          update_group: true
+        distance:
+          bgp:
+            routes_external: 2
+            routes_internal: 3
+            routes_local: 4
+          mbgp:
+            routes_external: 2
+            routes_internal: 3
+            routes_local: 5
+        distributes:
+          - in: true
+            prefix: prefixTest
+        maximum_paths:
+          ibgp: 2
+          paths: 2
+        maximum_secondary_paths:
+          paths: 22
+        neighbors:
+          - aigp:
+              send:
+                cost_community:
+                  id: 100
+                  poi:
+                    igp_cost: true
+                    transitive: true
+            description: merge neighbor
+            neighbor_address: 192.0.2.1
+            remote_as: '100'
+            route_maps:
+              - name: test-route
+                out: true
+          - neighbor_address: 192.0.2.10
+            remote_as: '64500'
+          - neighbor_address: 192.0.2.11
+            remote_as: '45000'
+            send_community:
+              extended: true
+          - neighbor_address: 192.0.2.12
+            remote_as: '45000'
+          - neighbor_address: 192.0.2.13
+            remote_as: "100.1"
+          - description: replace neighbor
+            neighbor_address: 192.0.2.5
+            remote_as: '100'
+            slow_peer:
+              detection:
+                disable: true
+          - neighbor_address: 192.0.2.9
+            remote_as: '64500'
+            route_maps:
+              - in: true
+                name: rmp2
+        networks:
+          - address: 192.0.2.4
+        redistribute:
+          - connected:
+              metric: 22
+              set: true
+          - static:
+              metric: 33
+              route_map: rmp1
+              set: true
+          - application:
+              metric: 22
+              name: app1
+          - application:
+              metric: 33
+              name: app2
+              route_map: mp1
+      build_info:
+        compiled_by: mcpre
+        compiled_date: Wed 13-Dec-23 21:43
+      config_register: 8450
+      data_privacy.hostname_privacy: DISABLED
+      data_privacy.version_privacy: DISABLED
+      detailed_info:
+        detailed_version: 17.13.1a
+        product: Virtual XE Software (X86_64_LINUX_IOSD-UNIVERSALK9-M)
+      device_name: aayuIOS
+      hardware:
+        model: " Cisco C8000V"
+        processor: VXE
+        serial_number: 9CX13C870MC
+      license:
+        smart_licensing: Smart Licensing Using Policy
+        type: Perpetual
+      license_conversion.enabled: true
+      license_overall.status: NOT INSTALLED
+      miscellaneous.custom_id: "<empty>"
+      os_type: IOS XE
+      policy.ack_required: "yes (CISCO default)"
+      policy.in_use: Merged from multiple sources.
+      product_info.pid: C8000V
+      product_info.serial: 9CX13C870MC
+      smart_licensing.status: ENABLED
+      system_image: bootflash:packages.conf
+      transport.type: cslu
+      transport.vrf: "<empty>"
+      version: "17.13.01a"

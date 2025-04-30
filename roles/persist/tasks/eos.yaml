@@ -1,0 +1,21 @@
+- name: Parse show version
+  ansible.utils.cli_parse:
+    command: "show version"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: version_resources
+
+- name: Parse hostname
+  ansible.utils.cli_parse:
+    command: "show hostname"
+    parser:
+      name: ansible.netcommon.native
+    set_fact: hostname_resources
+
+- name: Combine data into system_resources
+  ansible.builtin.set_fact:
+    result: "{{ version_resources | combine(hostname_resources, recursive=True) }}"
+
+- name: Append to all results
+  ansible.builtin.set_fact:
+    gathered_system_data: "{{ gathered_system_data | default([]) | list + [result] }}"
