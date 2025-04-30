@@ -8,7 +8,8 @@
 
 - name: Initialize persist_results if empty
   ansible.builtin.set_fact:
-    persist_results: "{{ persist_result }}"
+    persist_results: "{{ persist_result_output | default({}) }}"
+    
 - name: Write persist resource to a file
   ansible.builtin.copy:
     content: "{{ persist_results }}"
