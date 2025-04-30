@@ -8,10 +8,31 @@
 
 - The **Ansible Network Reports Collection** provides a platform-agnostic way to gather, generate, persist, and visualize network resource reports. 
   This collection enables users to collect network facts, convert them into structured formats (YAML, JSON), and visualize them as HTML reports using Jinja2 templates.
+  
+- This collection includes the following roles:
+
+- **`gather`**: Collect comprehensive network device facts for specified resources, including hardware details, using native parsers.
+- **`generate_report`**: Generate structured HTML reports from previously gathered network facts for visualization and analysis.
+- **`persist`**: Store gathered network facts in YAML format to local directories or remote SCM repositories, establishing a source of truth (SOT).
 
 - This collection can be used by **network administrators**, **system operators**, and **IT professionals** looking to monitor and manage their network infrastructure through automated reporting.
 
 ![Screenshot from 2025-02-11 17-30-19](https://github.com/user-attachments/assets/8f822ffd-519b-4cf8-915b-9c73351d46a5)
+
+## Included content
+
+Click on the name of a role to view its documentation:
+
+<!--start collection content-->
+### Roles
+
+Name                                                 | Description
+---------------------------------------------------- | -----------
+[network.reports.gather](roles/gather/README.md)     | Collect comprehensive network device facts using native parsers.
+[network.reports.generate_report](roles/generate_report/README.md) | Generate structured HTML reports from gathered network facts.
+[network.reports.persist](roles/persist/README.md)       | Store gathered network facts to local or remote repositories (SCM).
+
+<!--end collection content-->
 
 
 
@@ -20,11 +41,10 @@
 - [Requires Content Collections](https://github.com/redhat-cop/network.reports/blob/main/galaxy.yml)
 - [Testing Requirements](https://github.com/redhat-cop/network.reports/blob/main/test-requirements.txt)
 - Users also need to include platform collections as per their requirements. The supported platform collections are:
-  - [arista.eos](https://github.com/ansible-collections/arista.eos)
-  - [cisco.ios](https://github.com/ansible-collections/cisco.ios)
-  - [cisco.iosxr](https://github.com/ansible-collections/cisco.iosxr)
-  - [cisco.nxos](https://github.com/ansible-collections/cisco.nxos)
-  - [junipernetworks.junos](https://github.com/ansible-collections/junipernetworks.junos)
+  - [arista.eos](https://github.com/ansible-collections/arista.eos) >= v11.0.0  
+  - [cisco.ios](https://github.com/ansible-collections/cisco.ios) >= v10.0.0    
+  - [cisco.iosxr](https://github.com/ansible-collections/cisco.iosxr) >= v11.0.0 
+  - [cisco.nxos](https://github.com/ansible-collections/cisco.nxos) >= v10.0.0
 
 ## Installation
 To consume this Validated Content from Automation Hub, the following needs to be added to `ansible.cfg`:
@@ -51,64 +71,41 @@ ansible-galaxy collection install network.reports
 
 ## Use Cases
 
-### 1. Gather Network Resource Reports
-- Collect network resource facts like interfaces, BGP configurations, OSPF settings, etc.
-- Convert these facts into **YAML**, **JSON**, or **HTML** formats.
+This collection enables users to perform the following reporting tasks:
 
-```yaml
-- name: Gather Network Reports
-  hosts: network_devices
-  gather_facts: false
-  tasks:
-    - name: Network Resource Manager
-      ansible.builtin.include_role:
-        name: network.reports.gather
-      vars:
-        format:
-          - yaml
-          - json
-        resources:
-          - interfaces
-          - l2_interfaces
-          - bgp_global
+`Gather Network Resource Reports`
+- The `gather` role enables users to collect comprehensive network device facts for specified resources (like interfaces, BGP configurations, etc.), including hardware details, using native parsers. These facts form the basis for reports and persisted data.
+
+`Generate HTML Reports from Network Facts`
+- The `generate_report` role allows users to convert previously gathered network facts into structured HTML reports using Jinja2 templates, providing a visual representation of the network state.
+  
+- After the facts have been gathered, the next task is to generate the web report. This task runs locally on the localhost. The output of the network.reports.generate_report task will produce an HTML file summarizing the gathered facts.
+
+`Persist Network Data as Source of Truth (SOT)`
+- The `persist` role enables users to store gathered network facts (not just reports) in YAML format to local directories or remote SCM (like GitHub/GitLab) repositories. This establishes a version-controlled source of truth for network configuration data, useful for backup, audit, or driving configuration deployment.
+
+## Multi-Host Reporting Scenario
+
+This collection is designed to efficiently handle inventories with multiple network devices, even across different network operating systems. The `gather` role collects facts individually from each targeted host, and the `generate_report` role consolidates these facts into a single, unified HTML report.
+
+Example Playbook:
+
+**1. Example Inventory (`inventory.ini`)**
+
+Define your network devices in an Ansible inventory file. Ensure you specify the correct `ansible_network_os` for each device, along with connection details.
+
+```ini
+[network_devices]
+ios_router ansible_host=192.168.1.10 ansible_user=cisco ansible_ssh_pass=your_password ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.ios.ios
+nxos_switch ansible_host=192.168.1.20 ansible_user=admin ansible_ssh_pass=your_password ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.nxos.nxos
+
+[network_devices:vars]
+ ansible-1 ansible_host=54.190.208.146 ansible_ssh_port=2088 ansible_user=cisco ansible_ssh_password=cisco ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.ios.ios
+ ansible-2 ansible_host=54.190.208.146 ansible_ssh_port=2024 ansible_user=cisco ansible_ssh_password=cisco ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.nxos.nxos
 ```
+Resulting Report:
 
-### 2. Generate HTML Reports from Network Facts
-- Convert collected facts into **HTML web reports** using Jinja2 templates.
-- Run a lightweight **web server** to visualize the reports.
-
-```yaml
-- name: Generate Network HTML Report
-  hosts: network_devices
-  gather_facts: false
-  tasks:
-    - name: Generate Network Report
-      ansible.builtin.include_role:
-        name: network.reports.generate_web_report
-      vars:
-        file_path: "./network_reports"
-```
-
-### 3. Persist Network Reports to SCM (GitHub/GitLab)
-- Persist generated reports into **GitHub** or **GitLab** repositories for version control and audit.
-
-```yaml
-- name: Persist Reports to GitHub
-  hosts: network_devices
-  gather_facts: false
-  tasks:
-    - name: Persist Reports to GitHub Repository
-      ansible.builtin.include_role:
-        name: network.reports.persist
-      vars:
-        scm:
-          origin:
-            url: "{{ github_repo_url }}"
-            token: "{{ github_access_token }}"
-            user:
-              name: "{{ git_user_name }}"
-              email: "{{ git_user_email }}"
-```
+The generated HTML report will contain sections or tables summarizing the gathered information (interfaces, L2 interfaces) for both ios_router and nxos_switch. We will be able to see the data from all targeted devices consolidated within that single report file.
 
 ## Testing
 
@@ -121,7 +118,7 @@ The project uses **tox** to run `ansible-lint` and `ansible-test sanity`. Assumi
 
 To run integration tests, ensure that your inventory has a `network_reports` group.
 
-```shell
+```ini
 [network_devices]
 ios
 junos
@@ -169,10 +166,6 @@ Release notes are available [here](https://github.com/redhat-cop/network.reports
 - [Ansible Community Code of Conduct](https://docs.ansible.com/ansible/latest/community/code_of_conduct.html)
 
 ## Licensing
-
-GNU General Public License v3.0 or later.
-
-See [LICENSE](https://www.gnu.org/licenses/gpl-3.0.txt) to see the full text.
 
 GNU General Public License v3.0 or later.
 
