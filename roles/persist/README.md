@@ -35,9 +35,10 @@ In this example, gathered facts are stored in a local directory:
       ansible.builtin.include_role:
         name: network.reports.persist
       vars:
+        format: json
         resources:
-          - "interfaces"
-          - "l2_interfaces"
+          - "bgp_global"
+          - "bgp_address_family"
         data_store:
           local: "~/data/network"
 ```
@@ -58,6 +59,7 @@ In this example, gathered facts are stored in a remote Git repository:
       ansible.builtin.include_role:
         name: network.reports.persist
       vars:
+        format: json
         data_store:
           scm:
             parent_directory: "/home/rhel"
@@ -72,6 +74,112 @@ In this example, gathered facts are stored in a remote Git repository:
 Example Output
 When the playbook is executed, the persisted facts will be saved in the specified data store in a structured YAML format.
 
+- Json Output
+```json
+ ✝  ⚛ core_3.12.5  ~/ansible-dev-workspace  sudo cat /root/data/network/host_vars/ansible-2.yaml
+{
+    "all_gathered_resources": {
+        "bgp_address_family": {
+            "address_family": [
+                {
+                    "afi": "ipv4",
+                    "networks": [
+                        {
+                            "prefix": "10.0.0.0/24"
+                        },
+                        {
+                            "prefix": "172.16.0.0/16"
+                        }
+                    ],
+                    "safi": "unicast"
+                },
+                {
+                    "afi": "ipv6",
+                    "networks": [
+                        {
+                            "prefix": "2001:db8::/32"
+                        },
+                        {
+                            "prefix": "2001:db8:abcd::/48"
+                        }
+                    ],
+                    "safi": "unicast"
+                }
+            ],
+            "as_number": "65001"
+        },
+        "bgp_global": {
+            "as_number": "65001",
+            "neighbors": [
+                {
+                    "neighbor_address": "192.168.1.2",
+                    "remote_as": "65002",
+                    "update_source": "loopback0"
+                },
+                {
+                    "neighbor_address": "192.168.2.1",
+                    "remote_as": "65002"
+                },
+                {
+                    "neighbor_address": "2001:db8::2",
+                    "remote_as": "65003"
+                }
+            ],
+            "router_id": "1.1.1.1",
+            "timers": {
+                "bgp": {
+                    "holdtime": 90,
+                    "keepalive": 30
+                }
+            }
+        }
+    },
+    "device_info": [
+        {
+            "bootflash": 4495360,
+            "device_name": "aayushNXOS",
+            "hardware": {
+                "model": "Nexus9000 C9300v",
+                "serial_number": "9GT0HF5KR3M"
+            },
+            "last_reset_reason": "Unknown",
+            "license": {
+                "count": 1,
+                "description": "LAN license for Nexus 9300-XF",
+                "enforcement_type": "NOT ENFORCED",
+                "license_type": "Generic",
+                "name": "LAN_ENTERPRISE_SERVICES_PKG",
+                "status": "IN USE",
+                "version": 1.0
+            },
+            "memory": {
+                "free_mb": 1510.2734375,
+                "total_mb": 7945.015625,
+                "used_mb": 6434.7421875
+            },
+            "nxos_compile_time": "11/30/2023 12:00:00 [12/14/2023 05:25:50]",
+            "nxos_image_file": "bootflash:///nxos64-cs.10.4.2.F.bin",
+            "os_type": "NX-OS",
+            "processes": {
+                "running": 2,
+                "total": 898
+            },
+            "processor": {
+                "memory": 8135696,
+                "type": "Intel(R) Xeon(R) Platinum 8275CL CPU @ 3.00GHz"
+            },
+            "release_type": "Feature Release",
+            "uptime": {
+                "days": 119,
+                "hours": 21,
+                "minutes": 47,
+                "seconds": 6
+            },
+            "version": "10.4(2)"
+        }
+    ]
+}
+```
 ## License
 
 GNU General Public License v3.0 or later.

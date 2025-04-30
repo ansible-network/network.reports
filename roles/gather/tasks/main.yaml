@@ -60,8 +60,8 @@
   ansible.builtin.debug:
     msg: "{{ xml_conversion_output.stdout }}"
   when:
-    - output_format is defined
-    - output_format == 'xml'
+    - format is defined
+    - format == 'xml'
     - xml_conversion_output is defined
     - not xml_conversion_output.failed
   run_once: true
