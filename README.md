@@ -76,67 +76,13 @@ This collection enables users to perform the following reporting tasks:
 `Gather Network Resource Reports`
 - The `gather` role enables users to collect comprehensive network device facts for specified resources (like interfaces, BGP configurations, etc.), including hardware details, using native parsers. These facts form the basis for reports and persisted data.
 
-```yaml
-- name: Gather Network Reports for specific resources
-  hosts: network_devices
-  gather_facts: false
-  tasks:
-    - name: Invoke gather role for interfaces and BGP
-      ansible.builtin.include_role:
-        name: network.reports.gather
-      vars:
-        resources:
-          - interfaces
-          - l2_interfaces
-          - bgp_global
-```
-Example Output
-When the playbook is executed successfully, the output will display the all_gathered_facts for the specified resources.
-
-
 `Generate HTML Reports from Network Facts`
 - The `generate_report` role allows users to convert previously gathered network facts into structured HTML reports using Jinja2 templates, providing a visual representation of the network state.
-
-```yaml
-- name: Generate Network HTML Report
-  hosts: localhost
-  gather_facts: false
-  # Assumes facts were gathered previously (e.g., by the gather role)
-  tasks:
-    - name: Generate Report from gathered facts
-      ansible.builtin.include_role:
-        name: network.reports.generate_report
-```
-Example Output
-
-- This task collects information from the network devices about all the resources of that device.
-
+  
 - After the facts have been gathered, the next task is to generate the web report. This task runs locally on the localhost. The output of the network.reports.generate_report task will produce an HTML file summarizing the gathered facts.
 
 `Persist Network Data as Source of Truth (SOT)`
 - The `persist` role enables users to store gathered network facts (not just reports) in YAML format to local directories or remote SCM (like GitHub/GitLab) repositories. This establishes a version-controlled source of truth for network configuration data, useful for backup, audit, or driving configuration deployment.
-
-```yaml
-- name: Persist Gathered Facts to SCM
-  hosts: network_devices # Target your network devices group
-  gather_facts: false
-  # Assumes facts were gathered previously (e.g., by the gather role)
-  tasks:
-    - name: Persist Facts to GitHub Repository
-      ansible.builtin.include_role:
-        name: network.reports.persist
-      vars:
-        data_store:
-          scm:
-            parent_directory: "/tmp/network_reports_repo" 
-            origin:
-              url: "{{ github_repo_url }}" 
-              token: "{{ github_access_token }}"
-              user:
-                name: "{{ git_user_name }}"
-                email: "{{ git_user_email }}"
-```
-Example Output When the playbook is executed, the persisted facts will be saved in the specified data store in a structured YAML format.
 
 ## Multi-Host Reporting Scenario
 
@@ -156,30 +102,6 @@ nxos_switch ansible_host=192.168.1.20 ansible_user=admin ansible_ssh_pass=your_p
 [network_devices:vars]
  ansible-1 ansible_host=54.190.208.146 ansible_ssh_port=2088 ansible_user=cisco ansible_ssh_password=cisco ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.ios.ios
  ansible-2 ansible_host=54.190.208.146 ansible_ssh_port=2024 ansible_user=cisco ansible_ssh_password=cisco ansible_connection=ansible.netcommon.network_cli ansible_network_os=cisco.nxos.nxos
-```
-This playbook uses two plays: the first gathers facts from all devices in the network_devices group, and the second generates a single report (localhost).
-
-```yaml
-- name: Play 1 - Gather Facts from Multiple Network Devices
-  hosts: network_devices # Targets all hosts in the group defined in inventory
-  gather_facts: false
-  tasks:
-    - name: Invoke gather role for interfaces and L2 interfaces
-      ansible.builtin.include_role:
-        name: network.reports.gather
-      vars:
-        resources:
-          - "interfaces"
-          - "l2_interfaces"
-          # Add other resources as needed, e.g., "bgp_global", "lldp_neighbors"
-
-- name: Play 2 - Generate Consolidated HTML Report
-  hosts: localhost   
-  gather_facts: false
-  tasks:
-    - name: Generate report from all gathered facts
-      ansible.builtin.include_role:
-        name: network.reports.generate_report 
 ```
 Resulting Report:
 
