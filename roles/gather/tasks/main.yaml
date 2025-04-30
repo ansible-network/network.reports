@@ -10,13 +10,14 @@
 
 - name: Add gathered system data structure under 'device_info' key
   ansible.builtin.set_fact:
-    gather_result: >-
-      {{
-        {'all_gathered_resources': all_gathered_resources | default({})}
-        | combine(
-            {'device_info': (system_resources | default({})) | combine({'ansible_network_os': ansible_network_os | default('')})}
-          )
-      }}
+    gather_result:
+      all_gathered_resources: >-
+        {{
+          (all_gathered_resources | default({}))
+          | combine(
+              {'device_info': (system_resources | default({})) | combine({'ansible_network_os': ansible_network_os | default('')})}
+            )
+        }}
 
 - name: Display gathered facts as pretty JSON
   ansible.builtin.debug:

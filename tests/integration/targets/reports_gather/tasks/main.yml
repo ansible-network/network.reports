@@ -62,12 +62,18 @@
 
     - name: Filter device_info and sort
       ansible.builtin.set_fact:
-        filtered_device_info: "{{ gather_result.device_info | dict2items | rejectattr('key', 'in', exclude_keys) | list | sort(attribute='key') | items2dict }}"
-        
-    - name: Sort all_gathered_info
+        filtered_device_info: "{{ gather_result.all_gathered_resources.device_info | dict2items | rejectattr('key', 'in', exclude_keys) | list | sort(attribute='key') | items2dict }}"
+    
+    - name: Debug
+      debug:
+        var: gather_result.all_gathered_resources 
+  
+    - name: Remove device_info from all_gathered_resources
       ansible.builtin.set_fact:
-        filtered_all_gathered_resources: "{{ dict(gather_result.all_gathered_resources | dictsort) }}"
-   
+        filtered_all_gathered_resources: "{{ gather_result.all_gathered_resources | dict2items | 
+                                            rejectattr('key', 'eq', 'device_info') | 
+                                            items2dict }}"
+        
     - name: Combine all gathered information with resources first
       ansible.builtin.set_fact:
         combined_gathered_info: "{{ filtered_all_gathered_resources | combine(filtered_device_info) }}"

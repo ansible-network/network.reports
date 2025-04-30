@@ -42,7 +42,7 @@ Example Output
 When the playbook is executed successfully, the output will display the all_gathered_resources for the specified resources.
 - Yaml Output
 ```yaml
-   all_gathered_resources:
+     all_gathered_resources:
         bgp_address_family:
             address_family:
             -   afi: ipv4
@@ -71,42 +71,42 @@ When the playbook is executed successfully, the output will display the all_gath
                 bgp:
                     holdtime: 90
                     keepalive: 30
-    device_info:
-        ansible_network_os: cisco.nxos.nxos
-        bootflash: 4495360
-        device_name: aayushNXOS
-        hardware:
-            model: Nexus9000 C9300v
-            serial_number: 9GT0HF5KR3M
-        last_reset_reason: Unknown
-        license:
-            count: 1
-            description: LAN license for Nexus 9300-XF
-            enforcement_type: NOT ENFORCED
-            license_type: Generic
-            name: LAN_ENTERPRISE_SERVICES_PKG
-            status: IN USE
-            version: 1.0
-        memory:
-            free_mb: 1377.3515625
-            total_mb: 7945.015625
-            used_mb: 6567.6640625
-        nxos_compile_time: 11/30/2023 12:00:00 [12/14/2023 05:25:50]
-        nxos_image_file: bootflash:///nxos64-cs.10.4.2.F.bin
-        os_type: NX-OS
-        processes:
-            running: 1
-            total: 925
-        processor:
-            memory: 8135696
-            type: Intel(R) Xeon(R) Platinum 8275CL CPU @ 3.00GHz
-        release_type: Feature Release
-        uptime:
-            days: 119
-            hours: 22
-            minutes: 4
-            seconds: 46
-        version: 10.4(2)
+        device_info:
+            ansible_network_os: cisco.nxos.nxos
+            bootflash: 4495360
+            device_name: aayushNXOS
+            hardware:
+                model: Nexus9000 C9300v
+                serial_number: 9GT0HF5KR3M
+            last_reset_reason: Unknown
+            license:
+                count: 1
+                description: LAN license for Nexus 9300-XF
+                enforcement_type: NOT ENFORCED
+                license_type: Generic
+                name: LAN_ENTERPRISE_SERVICES_PKG
+                status: IN USE
+                version: 1.0
+            memory:
+                free_mb: 1518.28125
+                total_mb: 7945.015625
+                used_mb: 6426.734375
+            nxos_compile_time: 11/30/2023 12:00:00 [12/14/2023 05:25:50]
+            nxos_image_file: bootflash:///nxos64-cs.10.4.2.F.bin
+            os_type: NX-OS
+            processes:
+                running: 2
+                total: 896
+            processor:
+                memory: 8135696
+                type: Intel(R) Xeon(R) Platinum 8275CL CPU @ 3.00GHz
+            release_type: Feature Release
+            uptime:
+                days: 120
+                hours: 2
+                minutes: 22
+                seconds: 1
+            version: 10.4(2)
 ```
 - Json output
 ```json

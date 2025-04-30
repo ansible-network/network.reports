@@ -270,7 +270,7 @@
             <div class="sidebar">
                 <h2>Device Information</h2>
                 {# Assign facts to a shorter variable for readability #}
-                {% set facts = hostvars[network_switch].gather_result.device_info %}
+                {% set facts = hostvars[network_switch].gather_result.all_gathered_resources.device_info %}
                 {% set facts_all = hostvars[network_switch].gather_result.all_gathered_resources %}
                 {% if facts is defined %}
                 <ul>

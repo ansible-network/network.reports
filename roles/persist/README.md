@@ -78,6 +78,7 @@ When the playbook is executed, the persisted facts will be saved in the specifie
 ```json
  ✝  ⚛ core_3.12.5  ~/ansible-dev-workspace  sudo cat /root/data/network/host_vars/ansible-2.yaml
 {
+    {
     "all_gathered_resources": {
         "bgp_address_family": {
             "address_family": [
@@ -132,52 +133,52 @@ When the playbook is executed, the persisted facts will be saved in the specifie
                     "keepalive": 30
                 }
             }
-        }
-    },
-    "device_info": [
-        {
-            "bootflash": 4495360,
-            "device_name": "aayushNXOS",
-            "hardware": {
-                "model": "Nexus9000 C9300v",
-                "serial_number": "9GT0HF5KR3M"
-            },
-            "last_reset_reason": "Unknown",
-            "license": {
-                "count": 1,
-                "description": "LAN license for Nexus 9300-XF",
-                "enforcement_type": "NOT ENFORCED",
-                "license_type": "Generic",
-                "name": "LAN_ENTERPRISE_SERVICES_PKG",
-                "status": "IN USE",
-                "version": 1.0
-            },
-            "memory": {
-                "free_mb": 1510.2734375,
-                "total_mb": 7945.015625,
-                "used_mb": 6434.7421875
-            },
-            "nxos_compile_time": "11/30/2023 12:00:00 [12/14/2023 05:25:50]",
-            "nxos_image_file": "bootflash:///nxos64-cs.10.4.2.F.bin",
-            "os_type": "NX-OS",
-            "processes": {
-                "running": 2,
-                "total": 898
-            },
-            "processor": {
-                "memory": 8135696,
-                "type": "Intel(R) Xeon(R) Platinum 8275CL CPU @ 3.00GHz"
-            },
-            "release_type": "Feature Release",
-            "uptime": {
-                "days": 119,
-                "hours": 21,
-                "minutes": 47,
-                "seconds": 6
-            },
-            "version": "10.4(2)"
-        }
-    ]
+        },
+        "device_info": [
+            {
+                "bootflash": 4495360,
+                "device_name": "aayushNXOS",
+                "hardware": {
+                    "model": "Nexus9000 C9300v",
+                    "serial_number": "9GT0HF5KR3M"
+                },
+                "last_reset_reason": "Unknown",
+                "license": {
+                    "count": 1,
+                    "description": "LAN license for Nexus 9300-XF",
+                    "enforcement_type": "NOT ENFORCED",
+                    "license_type": "Generic",
+                    "name": "LAN_ENTERPRISE_SERVICES_PKG",
+                    "status": "IN USE",
+                    "version": 1.0
+                },
+                "memory": {
+                    "free_mb": 1511.11328125,
+                    "total_mb": 7945.015625,
+                    "used_mb": 6433.90234375
+                },
+                "nxos_compile_time": "11/30/2023 12:00:00 [12/14/2023 05:25:50]",
+                "nxos_image_file": "bootflash:///nxos64-cs.10.4.2.F.bin",
+                "os_type": "NX-OS",
+                "processes": {
+                    "running": 1,
+                    "total": 899
+                },
+                "processor": {
+                    "memory": 8135696,
+                    "type": "Intel(R) Xeon(R) Platinum 8275CL CPU @ 3.00GHz"
+                },
+                "release_type": "Feature Release",
+                "uptime": {
+                    "days": 120,
+                    "hours": 2,
+                    "minutes": 23,
+                    "seconds": 26
+                },
+                "version": "10.4(2)"
+            }
+        ]
+    }
 }
 ```
 ## License

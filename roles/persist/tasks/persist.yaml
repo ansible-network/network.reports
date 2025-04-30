@@ -35,8 +35,14 @@
 
 - name: Add gathered system data structure under 'device_info' key
   ansible.builtin.set_fact:
-    persist_result: "{{ {'all_gathered_resources': persist_result | default({})} | combine({'device_info': gathered_system_data | default({})}) }}"
-    
+    persist_result:
+      all_gathered_resources: >-  # Set the 'all_gathered_resources' key within 'persist_result'
+        {{
+          (persist_result | default({}))
+          | combine(
+              {'device_info': gathered_system_data | default({})}
+            )
+        }}
 - name: Store persist_result as pretty JSON
   ansible.builtin.set_fact:
     persist_result_output: "{{ persist_result | to_nice_json }}"
