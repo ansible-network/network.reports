@@ -18,6 +18,7 @@
     parser:
       name: ansible.netcommon.native
     set_fact: license_data
+  ignore_errors: true
 
 - name: Parse Memory
   ansible.utils.cli_parse:
@@ -33,6 +34,6 @@
       {{
         version_data
         | combine(hostname_resources, recursive=True)
-        | combine(license_data, recursive=True)
+        | combine(license_data | default({}), recursive=True)
         | combine(memory_resources, recursive=True)
       }}
