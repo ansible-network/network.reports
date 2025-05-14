@@ -19,15 +19,50 @@
             )
         }}
 
+- name: Add gathered system data structure under 'invnetory_name' key
+  ansible.builtin.set_fact:
+    "{{ inventory_hostname }}":
+      all_gathered_resources: >-
+        {{
+          (all_gathered_resources | default({}))
+          | combine(
+              {'device_info': (system_resources | default({})) | combine({'ansible_network_os': ansible_network_os | default('')})}
+            )
+        }}
+    
+- name: Initialize network report dictionary
+  ansible.builtin.set_fact:
+    network_reports: {}
+  run_once: true
+  delegate_to: localhost
+  
+- name: Aggregate gathered data from each host
+  ansible.builtin.set_fact:
+    network_reports: >-
+      {{
+        network_reports | combine({
+          item: hostvars[item].gather_result
+        })
+      }}
+  loop: "{{ groups['network'] }}"
+  run_once: true
+  delegate_to: localhost
+
+- name: display network_reports
+  ansible.builtin.debug:
+    msg: "{{ network_reports }}"
+  run_once: true
+  delegate_to: localhost
+  
 - name: Display gathered facts as pretty JSON
   ansible.builtin.debug:
-    msg: "{{ gather_result | to_nice_json }}"
+    msg: "{{ network_reports | to_nice_json }}"
   when: format is defined and format == 'json'
   run_once: true
 
 - name: Display gathered facts as pretty YAML
   ansible.builtin.debug:
-    msg: "{{ gather_result | to_nice_yaml }}"
+    msg: "{{ network_reports | to_nice_yaml }}"
   when: format is defined and format == 'yaml' or format is not defined
   run_once: true
 
@@ -49,7 +84,7 @@
       pretty_xml = dom.toprettyxml(indent='  ');
       print(pretty_xml)"
   args:
-    stdin: "{{ gather_result | to_json }}" 
+    stdin: "{{ network_reports | to_json }}" 
   register: xml_conversion_output
   changed_when: false
   check_mode: no
