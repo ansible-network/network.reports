@@ -101,3 +101,127 @@
     - xml_conversion_output is defined
     - not xml_conversion_output.failed
   run_once: true
+
+- name: Ensure pandas and pyarrow are installed on the control node for CSV output
+  ansible.builtin.pip:
+    name: 
+      - pandas
+      - pyarrow
+    state: present
+  delegate_to: localhost
+  run_once: true
+  become: no
+  when: format is defined and format == 'csv'
+
+- name: Set CSV output filename
+  ansible.builtin.set_fact:
+    csv_output_filename: "{{ output_file | default(inventory_hostname + '_network_inventory.csv') }}"
+  when: format is defined and format == 'csv'
+  run_once: false  # Run for each host
+
+- name: Create CSV converter script
+  ansible.builtin.copy:
+    dest: "{{ playbook_dir }}/csv_converter_temp.py"
+    mode: '0755'
+    content: |
+      #!/usr/bin/env python3
+      import sys
+      import json
+      import pandas as pd
+      import os
+      import datetime
+
+      def flatten_dict(d, parent_key="", sep="_"):
+          items = []
+          for k, v in d.items():
+              new_key = f"{parent_key}{sep}{k}" if parent_key else k
+              if isinstance(v, dict):
+                  items.extend(flatten_dict(v, new_key, sep=sep).items())
+              elif isinstance(v, list):
+                  for i, item in enumerate(v):
+                      if isinstance(item, dict):
+                          items.extend(flatten_dict(item, f"{new_key}{sep}{i}", sep=sep).items())
+                      else:
+                          items.append((f"{new_key}{sep}{i}", str(item)))
+              else:
+                  items.append((new_key, v))
+          return dict(items)
+
+      try:
+          data = json.load(sys.stdin)
+          flattened_data = flatten_dict(data)
+          df = pd.DataFrame([flattened_data])
+          
+          # Add timestamp and metadata
+          timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+          
+          # Print CSV data to stdout for Ansible to capture
+          print(df.to_csv(index=False))
+          
+      except Exception as e:
+          sys.stderr.write(f"Error: {str(e)}\n")
+          sys.exit(1)
+  delegate_to: localhost
+  run_once: true
+  when: format is defined and format == 'csv'
+  register: csv_script_result
+  changed_when: false
+
+- name: Convert gathered facts to CSV format
+  ansible.builtin.command:
+    cmd: "python3 {{ playbook_dir }}/csv_converter_temp.py"
+  args:
+    stdin: "{{ network_reports | to_json }}"
+  register: csv_conversion_output
+  changed_when: false
+  check_mode: no
+  delegate_to: localhost
+  run_once: true  # Run for each host
+  when: format is defined and format == 'csv'
+
+- name: Clean up temporary CSV converter script
+  ansible.builtin.file:
+    path: "{{ playbook_dir }}/csv_converter_temp.py"
+    state: absent
+  delegate_to: localhost
+  run_once: true
+  when: format is defined and format == 'csv'
+  changed_when: false
+
+- name: Display gathered facts as CSV
+  ansible.builtin.debug:
+    msg: "{{ csv_conversion_output.stdout }}"
+  when:
+    - format is defined
+    - format == 'csv'
+    - csv_conversion_output is defined
+    - not csv_conversion_output.failed
+  run_once: true  # Show for each host
+
+- name: Automatically save CSV output to file
+  ansible.builtin.copy:
+    content: "{{ csv_conversion_output.stdout }}"
+    dest: "{{ csv_output_filename }}"
+  delegate_to: localhost
+  run_once: true  
+  when:
+    - format is defined
+    - format == 'csv'
+    - csv_conversion_output is defined
+    - not csv_conversion_output.failed
+  register: saved_csv_file
+
+- name: Show saved CSV file information
+  ansible.builtin.debug:
+    msg: "CSV inventory saved to {{ saved_csv_file.dest }}"
+  when:
+    - format is defined
+    - format == 'csv'
+    - saved_csv_file is defined
+    - saved_csv_file.changed
+  run_once: true  # Show for each host
+  
+  
+  
+  
+  
