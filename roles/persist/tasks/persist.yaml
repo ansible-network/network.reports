@@ -56,7 +56,7 @@
 - name: Store persist_result as pretty JSON
   ansible.builtin.set_fact:
     persist_result_output: "{{ persist_result | to_nice_json }}"
-  when: format is defined and format == 'json'
+  when: format is defined and format == 'json' or format is not defined
  
 - name: Store persist_result as pretty JSON
   ansible.builtin.set_fact:

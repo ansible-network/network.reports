@@ -122,16 +122,17 @@
   delegate_to: localhost
   when: format is defined and format == 'csv'
 
-- name: Write CSV per device using inline Jinja2
+- name: Write a single CSV-style report with vertical parameter:value per device
   ansible.builtin.copy:
-    dest: "/tmp/report_{{ item['all_gathered_resources_device_info_device_name'] | default('unknown') }}.csv"
+    dest: "/tmp/report_all_devices.csv"
     content: |
-      {% set keys = item.keys() | list %}
-      {{ keys | join(',') }}
-      {% for k in keys %}
-      {{ item[k] | default('') }}{% if not loop.last %},{% endif %}
+      {% for device in flattened_reports %}
+      ======= DEVICE: {{ device['all_gathered_resources_device_info_device_name'] | default('unknown') }} =======
+      {% for key, value in device.items() %}
+      {{ key }}, {{ value }}
       {% endfor %}
-  loop: "{{ flattened_reports }}"
+      {% if not loop.last %}{{ '\n' }}{% endif %}
+      {% endfor %}
   run_once: true
   delegate_to: localhost
   when: format is defined and format == 'csv'
