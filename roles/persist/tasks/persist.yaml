@@ -16,7 +16,6 @@
       unsupported: []
   when: resources is undefined
 
-
 - name: Set Network resources
   ansible.builtin.set_fact:
     persist_network_resources: "{{ persist_network_resources_list['modules'] | ansible.utils.param_list_compare(resources) }}"
