@@ -44,33 +44,30 @@
 - name: Add gathered system data structure under 'device_info' key
   ansible.builtin.set_fact:
     persist_result:
-      all_gathered_resources: >-  # Set the 'all_gathered_resources' key within 'persist_result'
+      all_gathered_resources: >-
         {{
           (persist_result | default({}))
           | combine(
-              {'device_info': gathered_system_data | default({})}
+              {'device_info': (gathered_system_data | default({})) | combine({'ansible_network_os': ansible_network_os | default('')})}
             )
         }}
+
 - name: Store persist_result as pretty JSON
   ansible.builtin.set_fact:
     persist_result_output: "{{ persist_result | to_nice_json }}"
-  when: format is defined and format == 'json'
-  run_once: true
-
+  when: format is defined and format == 'json' or format is not defined
+ 
 - name: Store persist_result as pretty JSON
   ansible.builtin.set_fact:
     persist_result_output: "{{ persist_result | to_nice_yaml }}"
   when: format is defined and format == 'yaml' or format is not defined
-  run_once: true
 
 - name: Ensure dicttoxml is installed on the control node for XML output
   ansible.builtin.pip:
     name: dicttoxml
     state: present
   delegate_to: localhost
-  run_once: true
   when: format is defined and format == 'xml'
-
 
 - name: Convert gathered facts to pretty XML format
   become: false
@@ -86,8 +83,7 @@
     stdin: "{{ persist_result | to_json }}" 
   register: xml_conversion_output
   changed_when: false
-  check_mode: no
-  run_once: true         
+  check_mode: no       
   when: format is defined and format == 'xml'
 
 - name: Display gathered facts as pretty XML
@@ -98,7 +94,34 @@
     - format == 'xml'
     - xml_conversion_output is defined
     - not xml_conversion_output.failed
-  run_once: true
+
+- name: Flatten gathered data using custom filter
+  ansible.builtin.set_fact:
+    flattened_reports: >-
+      {{ 
+        persist_result | dict2items 
+        | map(attribute='value') 
+        | map('network.reports.flatten_dict') 
+        | list 
+      }}
+  delegate_to: localhost
+  when: format is defined and format == 'csv'
+
+- name: display flattened_reports
+  ansible.builtin.debug:
+    msg: "{{ flattened_reports }}"
+  delegate_to: localhost
+  when: format is defined and format == 'csv'
+
+- name: Convert flattened_reports list of dicts to CSV string
+  ansible.builtin.set_fact:
+    persist_result_output: |
+      {% set keys = flattened_reports[0].keys() | list %}
+      {{ keys | join(',') }}
+      {% for item in flattened_reports %}
+      {{ keys | map('extract', item) | map('default', '') | join(',') }}
+      {% endfor %}
+  when: format is defined and format == 'csv' and flattened_reports | length > 0
 
 - name: write to file
   ansible.builtin.include_tasks: write_to_file.yaml

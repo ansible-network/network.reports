@@ -6,13 +6,9 @@
     mode: "0777"
   delegate_to: localhost
 
-- name: Initialize persist_results if empty
-  ansible.builtin.set_fact:
-    persist_results: "{{ persist_result_output | default({}) }}"
-    
 - name: Write persist resource to a file
   ansible.builtin.copy:
-    content: "{{ persist_results }}"
-    dest: "{{ persist_inventory_path }}/host_vars/{{ inventory_hostname }}.yaml"
+    content: "{{ persist_result_output }}"
+    dest: "{{ persist_inventory_path }}/host_vars/{{ inventory_hostname }}.{{ format | default('yaml') }}"
     mode: "0777"
   delegate_to: localhost
