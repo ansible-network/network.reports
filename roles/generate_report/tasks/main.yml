@@ -1,4 +1,10 @@
 ---
+- name: Set target hosts fact
+  ansible.builtin.set_fact:
+    report_target_hosts: "{{ ansible_play_hosts }}"
+  run_once: true
+  delegate_to: localhost
+
 - name: Creates directory
   ansible.builtin.file:
     path: "{{ file_path }}"
@@ -25,6 +31,8 @@
     dest: "{{ file_path }}/index.html"
     mode: "0777"
     #mode: "644"
+  vars:
+    target_hosts: "{{ report_target_hosts | list }}"
   delegate_to: localhost
 
 - name: Copy CSS over

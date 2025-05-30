@@ -244,15 +244,16 @@
 
     <!-- Device Selector -->
     <div class="device-selector">
-        {% for network_switch in groups['network']|sort %}
-            <button class="device-button" data-device="{{ network_switch }}">
-                {# Try to get configured device name first, fallback to inventory hostname #}
-                {% if hostvars[network_switch].all_gathered_resources is defined and hostvars[network_switch].all_gathered_resources.device_name is defined and hostvars[network_switch].all_gathered_resources.device_name %}
-                    {{ hostvars[network_switch].all_gathered_resources.device_name }}
-                {% else %}
-                    {{ network_switch }}
-                {% endif %}
-            </button>
+        {% for network_switch in hostvars.keys()|sort %}
+            {% if hostvars[network_switch].gather_result is defined %}
+                <button class="device-button" data-device="{{ network_switch }}">
+                    {% if hostvars[network_switch].all_gathered_resources is defined and hostvars[network_switch].all_gathered_resources.device_name is defined and hostvars[network_switch].all_gathered_resources.device_name %}
+                        {{ hostvars[network_switch].all_gathered_resources.device_name }}
+                    {% else %}
+                        {{ network_switch }}
+                    {% endif %}
+                </button>
+            {% endif %}
         {% endfor %}
     </div>
 
@@ -263,7 +264,7 @@
     </div>
 
     <!-- Device Content Sections -->
-    {% for network_switch in groups['network']|sort %}
+    {% for network_switch in hostvars.keys()|sort %}
     <div class="device-content" id="device-{{ network_switch }}">
         <div class="container">
             <!-- Sidebar -->

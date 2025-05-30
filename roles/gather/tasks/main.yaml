@@ -44,7 +44,7 @@
           item: hostvars[item].gather_result
         })
       }}
-  loop: "{{ groups['network'] }}"
+  loop: "{{ ansible_play_hosts | list }}"
   run_once: true
   delegate_to: localhost
 
