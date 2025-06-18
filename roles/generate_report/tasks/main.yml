@@ -62,7 +62,12 @@
   failed_when: public_ip_report.status != 200
   changed_when: false
 
+- name: Extract IP address from HTML
+  ansible.builtin.set_fact:
+    extracted_ip: "{{ (public_ip_report.content | regex_search('<strong id=\"ip_address\">\\s*([^\\s<]+)', '\\1') | first) | default(ansible_fqdn) }}"
+  when: not public_ip_report.failed
+
 - name: Display link to inventory report
   ansible.builtin.debug:
     msg:
-      - "Please go to http://{{ public_ip_report.content | default(ansible_fqdn) }}:{{ generate_report_web_port }}"
+      - "Please go to http://{{ extracted_ip | default(ansible_fqdn) }}:{{ generate_report_web_port }}"

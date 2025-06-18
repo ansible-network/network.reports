@@ -17,6 +17,7 @@
     command: "sh running-config | include hostname"
     parser:
       name: ansible.netcommon.native
+      template_path: "iosxr_sh_running-config_include_hostname.yaml"
     set_fact: hostname_resources
 
 - name: Parse license data
