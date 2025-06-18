@@ -2,10 +2,10 @@
 - name: Include validation tasks
   ansible.builtin.include_tasks: validation.yaml
 
-- name: Include network resource tasks
+- name: Include network resources tasks
   ansible.builtin.include_tasks: network_resources.yaml
 
-- name: Include system resouces tasks
+- name: Include system resources tasks
   ansible.builtin.include_tasks: system_resources.yaml
 
 - name: Add gathered system data structure under 'device_info' key
@@ -19,16 +19,33 @@
             )
         }}
 
-- name: Add gathered system data structure under 'invnetory_name' key
+# - name: Add gathered system data structure under 'inventory_name' key
+#   ansible.builtin.set_fact:
+#     "{{ inventory_hostname }}":
+#       all_gathered_resources: >-
+#         {{
+#           (all_gathered_resources | default({}))
+#           | combine(
+#               {'device_info': (system_resources | default({})) | combine({'ansible_network_os': ansible_network_os | default('')})}
+#             )
+#         }}
+
+
+- name: Add gathered system data structure under 'inventory_name' key
   ansible.builtin.set_fact:
-    "{{ inventory_hostname }}":
-      all_gathered_resources: >-
-        {{
-          (all_gathered_resources | default({}))
-          | combine(
-              {'device_info': (system_resources | default({})) | combine({'ansible_network_os': ansible_network_os | default('')})}
-            )
-        }}
+    all_gathered_by_host: >-
+      {{
+        (all_gathered_by_host | default({}))
+        | combine({
+            inventory_hostname: {
+              'all_gathered_resources': {
+                'device_info': (system_resources | default({}))
+                | combine({'ansible_network_os': ansible_network_os | default('')})
+              }
+            }
+          })
+      }}
+
     
 - name: Initialize network report dictionary
   ansible.builtin.set_fact:

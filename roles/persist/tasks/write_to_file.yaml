@@ -1,14 +1,16 @@
 ---
 - name: Ensure inventory directory exists
   ansible.builtin.file:
-    path: "{{ persist_inventory_path }}/host_vars/{{ inventory_hostname }}"
+    path: "{{ persist_inventory_path }}"
     state: directory
     mode: "0777"
   delegate_to: localhost
+  become: false
 
 - name: Write persist resource to a file
   ansible.builtin.copy:
     content: "{{ persist_result_output }}"
-    dest: "{{ persist_inventory_path }}/host_vars/{{ inventory_hostname }}.{{ format | default('yaml') }}"
+    dest: "{{ persist_inventory_path }}/{{ persist_inventory_filename }}.{{ format | default('yaml') }}"
     mode: "0777"
   delegate_to: localhost
+  become: false

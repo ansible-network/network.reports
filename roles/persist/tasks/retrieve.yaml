@@ -13,6 +13,6 @@
   ansible.builtin.set_fact:
     persist_repository: "{{ persist_result }}"
 
-- name: Update Inventory Path
-  ansible.builtin.set_fact:
-    persist_inventory_path: "{{ persist_repository['path'] }}"
+#- name: Update Inventory Path
+#  ansible.builtin.set_fact:
+#    persist_inventory_path: "{{ persist_repository['path'] }}"
