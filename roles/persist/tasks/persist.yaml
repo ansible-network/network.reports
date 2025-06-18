@@ -24,6 +24,28 @@
 - name: Resolve inventory
   ansible.builtin.include_tasks: manage_inventory.yaml
 
+# --------------- filename and dir customization ----------
+- name: Get scm url
+  ansible.builtin.set_fact:
+    network_backup_path_root: "{{ role_path }}/{{  data_store.scm.origin.url.split('/')[-1] }}"
+  when: data_store['scm']['origin'] is defined
+
+- name: Get file name
+  ansible.builtin.set_fact:
+    persist_inventory_path: "{{ network_backup_path_root }}/{{  data_store.scm.origin.path | default(role_path, true)}}"
+  when: data_store['scm']['origin'] is defined
+
+- name: Get timestamp
+  ansible.builtin.set_fact:
+    timestamp: "{{ lookup('pipe', 'date +%Y-%m-%d_%H-%M-%S') }}"
+
+- name: Set default filename
+  ansible.builtin.set_fact:
+    persist_inventory_filename: >-
+      {{ data_store.scm.origin.filename | default(inventory_hostname ~ '_' ~ timestamp ~ '.txt', true) }}
+
+# ---------------------------------------------------------
+
 - name: Include retrieve tasks
   ansible.builtin.include_tasks: retrieve.yaml
   when: data_store['scm'] is defined
@@ -51,16 +73,45 @@
               {'device_info': (gathered_system_data | default({})) | combine({'ansible_network_os': ansible_network_os | default('')})}
             )
         }}
+- name: Get timestamp
+  ansible.builtin.set_fact:
+    timestamp: "{{ lookup('pipe', 'date -u +%Y-%m-%dT%H:%M:%SZ') }}"
+
+- name: Inject metadata inside all_gathered_resources
+  ansible.builtin.set_fact:
+    persist_result:
+      all_gathered_resources: >-
+        {{
+          persist_result['all_gathered_resources']
+          | combine({
+              'metadata': {
+                'ip': ansible_host | default(inventory_hostname),
+                'inventory_hostname': inventory_hostname,
+                'timestamp': timestamp,
+                'report_version': "1.0"
+              }
+            })
+        }}
+
+# - name: Add metadata to final persist_result
+#   ansible.builtin.set_fact:
+#     persist_result['all_gathered_resources']:
+#       metadata:
+#         ip: "{{ ansible_host | default(inventory_hostname) }}"
+#         inventory_hostname: "{{ inventory_hostname }}"
+#         timestamp: "{{ timestamp }}"
+#         report_version: "1.0"
+#       all_gathered_resources: "{{ persist_result['all_gathered_resources'] }}"
 
 - name: Store persist_result as pretty JSON
   ansible.builtin.set_fact:
-    persist_result_output: "{{ persist_result | to_nice_json }}"
+    persist_result_output: "{{ persist_result['all_gathered_resources'] | to_nice_json }}"
   when: format is defined and format == 'json' or format is not defined
  
-- name: Store persist_result as pretty JSON
+- name: Store persist_result as pretty yaml
   ansible.builtin.set_fact:
-    persist_result_output: "{{ persist_result | to_nice_yaml }}"
-  when: format is defined and format == 'yaml' or format is not defined
+    persist_result_output: "{{ persist_result['all_gathered_resources'] | to_nice_yaml }}"
+  when: format is defined and format == 'yaml'
 
 - name: Ensure dicttoxml is installed on the control node for XML output
   ansible.builtin.pip:
@@ -80,7 +131,7 @@
       print(pretty_xml)"
   
   args:
-    stdin: "{{ persist_result | to_json }}" 
+    stdin: "{{ persist_result['all_gathered_resources'] | to_json }}" 
   register: xml_conversion_output
   changed_when: false
   check_mode: no       
@@ -99,7 +150,7 @@
   ansible.builtin.set_fact:
     flattened_reports: >-
       {{ 
-        persist_result | dict2items 
+        persist_result['all_gathered_resources'] | dict2items 
         | map(attribute='value') 
         | map('network.reports.flatten_dict') 
         | list 
@@ -109,7 +160,7 @@
 
 - name: display flattened_reports
   ansible.builtin.debug:
-    msg: "{{ flattened_reports }}"
+    msg: "{{ flattened_reports['all_gathered_resources'] }}"
   delegate_to: localhost
   when: format is defined and format == 'csv'
 
