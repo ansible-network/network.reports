@@ -26,7 +26,7 @@
       name: ansible.netcommon.native
     set_fact: licence_data
 
-- name: parse show inventory
+- name: Parse show inventory
   ansible.utils.cli_parse:
     command: "show inventory"
     parser:

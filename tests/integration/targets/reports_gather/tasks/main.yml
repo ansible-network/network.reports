@@ -30,17 +30,17 @@
     - name: Include Cisco IOSXR verification
       ansible.builtin.include_tasks: cisco_iosxr_verify.yml
       when: "'cisco.iosxr.iosxr' in detected_os"
-    
+
     - name: Include Cisco IOS verification
       ansible.builtin.include_tasks: cisco_ios_verify.yml
       when: "'cisco.ios.ios' in detected_os"
 
     - name: Set default empty list for excluded keys
-      set_fact:
+      ansible.builtin.set_fact:
         exclude_keys: []
 
     - name: Define NX-OS specific excluded keys (overrides default if condition met)
-      set_fact:
+      ansible.builtin.set_fact:
         exclude_keys:
           - memory
           - nxos_compile_time
@@ -49,31 +49,36 @@
       when: "'cisco.nxos.nxos' in detected_os"
 
     - name: Define IOS/IOS/EOS XE specific excluded keys
-      set_fact:
+      ansible.builtin.set_fact:
         exclude_keys:
           - memory
           - last_reload_reason
           - reload_reason
           - build_info.compiled_date
           - uptime
-          - processes 
-         
+          - processes
+
       when: ansible_network_os in ['cisco.ios.ios', 'cisco.iosxe.iosxe', 'arista.eos.eos']
 
     - name: Filter device_info and sort
       ansible.builtin.set_fact:
-        filtered_device_info: "{{ gather_result.all_gathered_resources.device_info | dict2items | rejectattr('key', 'in', exclude_keys) | list | sort(attribute='key') | items2dict }}"
-    
+        filtered_device_info: >-
+          {{ gather_result.all_gathered_resources.device_info
+          | dict2items
+          | rejectattr('key', 'in', exclude_keys)
+          | list
+          | sort(attribute='key')
+          | items2dict }}
     - name: Debug
-      debug:
-        var: gather_result.all_gathered_resources 
-  
+      ansible.builtin.debug:
+        var: gather_result.all_gathered_resources
+
     - name: Remove device_info from all_gathered_resources
       ansible.builtin.set_fact:
-        filtered_all_gathered_resources: "{{ gather_result.all_gathered_resources | dict2items | 
-                                            rejectattr('key', 'eq', 'device_info') | 
+        filtered_all_gathered_resources: "{{ gather_result.all_gathered_resources | dict2items |
+                                            rejectattr('key', 'eq', 'device_info') |
                                             items2dict }}"
-        
+
     - name: Combine all gathered information with resources first
       ansible.builtin.set_fact:
         combined_gathered_info: "{{ filtered_all_gathered_resources | combine(filtered_device_info) }}"
@@ -88,7 +93,7 @@
 
 
     - name: Assert that facts match after filtering
-      assert:
+      ansible.builtin.assert:
         that:
           - combined_gathered_info == expected_facts
         fail_msg: "Facts mismatch after ignoring dynamic keys!"

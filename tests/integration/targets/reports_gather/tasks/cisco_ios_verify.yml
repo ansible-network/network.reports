@@ -10,12 +10,12 @@
         - name: Loopback999
         - name: GigabitEthernet1
         - address_family:
-          - afi: ipv4
-            dead_interval:
-              time: 5
-            network:
-              broadcast: true
-            resync_timeout: 10
+            - afi: ipv4
+              dead_interval:
+                time: 5
+              network:
+                broadcast: true
+              resync_timeout: 10
           name: GigabitEthernet2
         - name: GigabitEthernet3
         - name: GigabitEthernet4

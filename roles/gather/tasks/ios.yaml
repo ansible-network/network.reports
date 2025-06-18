@@ -18,7 +18,11 @@
     parser:
       name: ansible.netcommon.native
     set_fact: license_data
-  ignore_errors: true
+  register: license_command_result
+  failed_when:
+    - license_command_result.failed
+    - "'Invalid input' not in license_command_result.stdout"
+    - "'unrecognized command' not in license_command_result.stdout"
 
 - name: Parse Memory
   ansible.utils.cli_parse:

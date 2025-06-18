@@ -20,7 +20,7 @@
   ansible.builtin.set_fact:
     persist_network_resources: "{{ persist_network_resources_list['modules'] | ansible.utils.param_list_compare(resources) }}"
   when: resources is defined
-  
+
 - name: Resolve inventory
   ansible.builtin.include_tasks: manage_inventory.yaml
 
@@ -56,7 +56,7 @@
   ansible.builtin.set_fact:
     persist_result_output: "{{ persist_result | to_nice_json }}"
   when: format is defined and format == 'json' or format is not defined
- 
+
 - name: Store persist_result as pretty JSON
   ansible.builtin.set_fact:
     persist_result_output: "{{ persist_result | to_nice_yaml }}"
@@ -78,12 +78,12 @@
       dom = minidom.parseString(xml_bytes);
       pretty_xml = dom.toprettyxml(indent='  ');
       print(pretty_xml)"
-  
+
   args:
-    stdin: "{{ persist_result | to_json }}" 
+    stdin: "{{ persist_result | to_json }}"
   register: xml_conversion_output
   changed_when: false
-  check_mode: no       
+  check_mode: false
   when: format is defined and format == 'xml'
 
 - name: Display gathered facts as pretty XML
@@ -98,16 +98,16 @@
 - name: Flatten gathered data using custom filter
   ansible.builtin.set_fact:
     flattened_reports: >-
-      {{ 
-        persist_result | dict2items 
-        | map(attribute='value') 
-        | map('network.reports.flatten_dict') 
-        | list 
+      {{
+        persist_result | dict2items
+        | map(attribute='value')
+        | map('network.reports.flatten_dict')
+        | list
       }}
   delegate_to: localhost
   when: format is defined and format == 'csv'
 
-- name: display flattened_reports
+- name: Display flattened_reports
   ansible.builtin.debug:
     msg: "{{ flattened_reports }}"
   delegate_to: localhost
@@ -123,7 +123,7 @@
       {% endfor %}
   when: format is defined and format == 'csv' and flattened_reports | length > 0
 
-- name: write to file
+- name: Write to file
   ansible.builtin.include_tasks: write_to_file.yaml
 
 - name: Include publish with tag tasks

@@ -4,12 +4,12 @@
       ansible_network_os: "cisco.iosxr.iosxr"
       ospf_interfaces:
         - address_family:
-          - afi: ipv4
-            cost: 50
-            processes:
-              - area:
-                  area_id: '0'
-                process_id: MYOSPF
+            - afi: ipv4
+              cost: 50
+              processes:
+                - area:
+                    area_id: '0'
+                  process_id: MYOSPF
           name: GigabitEthernet0/0/0/0
           type: gigabitethernet
       ospfv2:

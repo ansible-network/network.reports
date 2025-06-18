@@ -19,7 +19,4 @@
         state: "{{ detect_state }}"
       check_mode: true
       register: detect_result
-
-    - name: Detect if there is config drift.
-      ansible.builtin.include_tasks: display_drift.yaml
-      when: (detect_result.changed)
+      notify: display drift details

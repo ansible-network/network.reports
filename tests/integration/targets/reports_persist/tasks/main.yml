@@ -26,7 +26,7 @@
       ansible.builtin.include_role:
         name: network.reports.persist
       vars:
-        resources: 
+        resources:
           - "interfaces"
         data_store: "{{ test_data_store }}"
       register: reports_result
