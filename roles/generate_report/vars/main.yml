@@ -1,14 +1,14 @@
-file_path: /data/report
-web_host: ansible-1
-web_port: 8902
+generate_report_file_path: /data/report
+generate_report_web_host: ansible-1
+generate_report_web_port: 8902
 # multi key, same value lookup for cisco
-vendor:
+generate_report_vendor:
   ios: &my_value "Cisco"
   nxos: *my_value
   iosxr: *my_value
   junos: "Juniper"
   eos: "Arista"
-transport:
+generate_report_transport:
   cliconf: "network_cli"
   netconf: "netconf"
   httpapi: "httpapi"

@@ -29,13 +29,13 @@
               {'device_info': (system_resources | default({})) | combine({'ansible_network_os': ansible_network_os | default('')})}
             )
         }}
-    
+
 - name: Initialize network report dictionary
   ansible.builtin.set_fact:
     network_reports: {}
   run_once: true
   delegate_to: localhost
-  
+
 - name: Aggregate gathered data from each host
   ansible.builtin.set_fact:
     network_reports: >-
@@ -48,12 +48,12 @@
   run_once: true
   delegate_to: localhost
 
-- name: display network_reports
+- name: Display network_reports
   ansible.builtin.debug:
     msg: "{{ network_reports }}"
   run_once: true
   delegate_to: localhost
-  
+
 - name: Display gathered facts as pretty JSON
   ansible.builtin.debug:
     msg: "{{ network_reports | to_nice_json }}"
@@ -72,7 +72,7 @@
     state: present
   delegate_to: localhost
   run_once: true
-  become: no 
+  become: false
   when: format is defined and format == 'xml'
 
 - name: Convert gathered facts to pretty XML format
@@ -84,12 +84,12 @@
       pretty_xml = dom.toprettyxml(indent='  ');
       print(pretty_xml)"
   args:
-    stdin: "{{ network_reports | to_json }}" 
+    stdin: "{{ network_reports | to_json }}"
   register: xml_conversion_output
   changed_when: false
-  check_mode: no
-  delegate_to: localhost 
-  run_once: true         
+  check_mode: false
+  delegate_to: localhost
+  run_once: true
   when: format is defined and format == 'xml'
 
 - name: Display gathered facts as pretty XML
@@ -101,21 +101,21 @@
     - xml_conversion_output is defined
     - not xml_conversion_output.failed
   run_once: true
-  
+
 - name: Flatten gathered data using custom filter
   ansible.builtin.set_fact:
     flattened_reports: >-
-      {{ 
-        network_reports | dict2items 
-        | map(attribute='value') 
-        | map('network.reports.flatten_dict') 
-        | list 
+      {{
+        network_reports | dict2items
+        | map(attribute='value')
+        | map('network.reports.flatten_dict')
+        | list
       }}
   run_once: true
   delegate_to: localhost
   when: format is defined and format == 'csv'
 
-- name: display flattened_reports
+- name: Display flattened_reports
   ansible.builtin.debug:
     msg: "{{ flattened_reports }}"
   run_once: true
@@ -133,6 +133,7 @@
       {% endfor %}
       {% if not loop.last %}{{ '\n' }}{% endif %}
       {% endfor %}
+    mode: '0644'
   run_once: true
   delegate_to: localhost
   when: format is defined and format == 'csv'

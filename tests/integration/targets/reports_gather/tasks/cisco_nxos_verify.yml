@@ -70,11 +70,11 @@
         - name: Tunnel1
         - name: Vlan1
         - address_family:
-          - afi: ipv4
-            processes:
-              - area:
-                  area_id: 0.0.0.0
-                process_id: '10'
+            - afi: ipv4
+              processes:
+                - area:
+                    area_id: 0.0.0.0
+                  process_id: '10'
           name: Vlan10
         - name: mgmt0
         - name: port-channel1

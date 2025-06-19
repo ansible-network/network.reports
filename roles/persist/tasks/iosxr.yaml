@@ -17,6 +17,7 @@
     command: "sh running-config | include hostname"
     parser:
       name: ansible.netcommon.native
+      template_path: "iosxr_sh_running-config_include_hostname.yaml"
     set_fact: hostname_resources
 
 - name: Parse license data
@@ -26,7 +27,7 @@
       name: ansible.netcommon.native
     set_fact: licence_data
 
-- name: parse show inventory
+- name: Parse show inventory
   ansible.utils.cli_parse:
     command: "show inventory"
     parser:

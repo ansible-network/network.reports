@@ -1,7 +1,7 @@
 # Ansible Network Reports
 
 [![CI](https://github.com/redhat-cop/network.reports/actions/workflows/tests.yml/badge.svg?event=schedule)](https://github.com/redhat-cop/network.reports/actions/workflows/tests.yml)
-[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7661/badge)](https://bestpractices.coreinfrastructure.org/projects/7661)
+[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/10755/badge)](https://bestpractices.coreinfrastructure.org/projects/10755)
 
 
 ## About

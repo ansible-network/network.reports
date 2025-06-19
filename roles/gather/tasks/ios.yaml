@@ -10,6 +10,7 @@
     command: "sh running-config | include hostname"
     parser:
       name: ansible.netcommon.native
+      template_path: "ios_sh_running-config_include_hostname.yaml"
     set_fact: hostname_resources
 
 - name: Parse license
@@ -18,7 +19,20 @@
     parser:
       name: ansible.netcommon.native
     set_fact: license_data
-  ignore_errors: true
+  register: license_output
+  failed_when:
+    - license_output.failed
+    - "'Invalid input' not in (license_output.msg | default([]) | join(' '))"
+    - "'unrecognized command' not in (license_output.msg | default([]) | join(' ') | lower)"
+
+- name: Set empty license_data if command failed
+  ansible.builtin.set_fact:
+    license_data: {}
+  vars:
+    error_msg: "{{ license_output.msg | default([]) | join(' ') | lower }}"
+  when:
+    - license_output.failed
+    - "'invalid input' in error_msg or 'unrecognized command' in error_msg"
 
 - name: Parse Memory
   ansible.utils.cli_parse:

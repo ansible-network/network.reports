@@ -7,7 +7,7 @@
 
 - name: Creates directory
   ansible.builtin.file:
-    path: "{{ file_path }}"
+    path: "{{ generate_report_file_path }}"
     state: directory
     mode: "0777"
     recurse: true
@@ -20,17 +20,16 @@
     image: docker.io/nginx:stable-alpine3.17-slim
     state: started
     ports:
-      - "{{ web_port }}:80"
+      - "{{ generate_report_web_port }}:80"
     volumes:
-      - "{{ file_path }}:/usr/share/nginx/html:Z"
+      - "{{ generate_report_file_path }}:/usr/share/nginx/html:Z"
     recreate: true
 
 - name: Create HTML report
   ansible.builtin.template:
     src: report.j2
-    dest: "{{ file_path }}/index.html"
+    dest: "{{ generate_report_file_path }}/index.html"
     mode: "0777"
-    #mode: "644"
   vars:
     target_hosts: "{{ report_target_hosts | list }}"
   delegate_to: localhost
@@ -38,7 +37,7 @@
 - name: Copy CSS over
   ansible.builtin.copy:
     src: "css"
-    dest: "{{ file_path }}"
+    dest: "{{ generate_report_file_path }}"
     directory_mode: true
     mode: "0777"
   delegate_to: localhost
@@ -46,10 +45,9 @@
 - name: Copy CSS over
   ansible.builtin.copy:
     src: "{{ item }}"
-    dest: "{{ file_path }}"
+    dest: "{{ generate_report_file_path }}"
     directory_mode: true
     mode: "0777"
-    #mode: "644"
   delegate_to: localhost
   loop:
     - "webpage_logo.png"
@@ -57,11 +55,19 @@
     - "router.png"
 
 - name: Retrieve public IP address
-  ansible.builtin.command: curl https://ifconfig.me
+  ansible.builtin.uri:
+    url: https://ifconfig.me
+    return_content: true
   register: public_ip_report
-  ignore_errors: true
+  failed_when: public_ip_report.status != 200
+  changed_when: false
+
+- name: Extract IP address from HTML
+  ansible.builtin.set_fact:
+    extracted_ip: "{{ (public_ip_report.content | regex_search('<strong id=\"ip_address\">\\s*([^\\s<]+)', '\\1') | first) | default(ansible_fqdn) }}"
+  when: not public_ip_report.failed
 
 - name: Display link to inventory report
   ansible.builtin.debug:
     msg:
-      - "Please go to http://{{ public_ip_report.stdout | default(ansible_fqdn) }}:{{ web_port }}"
+      - "Please go to http://{{ extracted_ip | default(ansible_fqdn) }}:{{ generate_report_web_port }}"

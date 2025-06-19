@@ -14,6 +14,7 @@ def flatten_dict(data, parent_key='', sep='_'):
             items[new_key] = str(v)
     return items
 
+
 class FilterModule:
     def filters(self):
         return {'flatten_dict': flatten_dict}

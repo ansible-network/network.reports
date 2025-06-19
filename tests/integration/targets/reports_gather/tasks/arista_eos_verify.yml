@@ -18,17 +18,17 @@
         - name: Loopback0
         - name: Management1
         - address_family:
-          - afi: ipv4
-            area:
-              area_id: 0.0.0.50
-            cost: 500
-            mtu_ignore: true
-          - afi: ipv6
-            dead_interval: 44
-            ip_params:
-              - afi: ipv6
-                mtu_ignore: true
-                network: point-to-point
+            - afi: ipv4
+              area:
+                area_id: 0.0.0.50
+              cost: 500
+              mtu_ignore: true
+            - afi: ipv6
+              dead_interval: 44
+              ip_params:
+                - afi: ipv6
+                  mtu_ignore: true
+                  network: point-to-point
           name: Vlan1
       ospfv2:
         processes:
