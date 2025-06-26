@@ -1,0 +1,2 @@
+trivial:
+  - Fixed Jinja2 spacing in `gather/tasks/facts.yaml` to satisfy linting rules.
